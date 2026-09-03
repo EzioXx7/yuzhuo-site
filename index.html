@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>育卓 · 个人站</title>
+<meta name="description" content="育卓的个人小站：网文写作助手、求职追踪等自制工具合集。">
+<style>
+:root{
+  --bg:#f2faf7; --card:#ffffff; --text:#10322b; --muted:#6b8b82;
+  --border:#dcebe6; --border-strong:#c2d8d0;
+  --accent:#14b8a6; --accent-h:#0d9488; --tint:#e1f7f0;
+  --radius:14px;
+}
+html{font-size:clamp(13px, 0.5vw + 9px, 17.5px)}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- 顶部导航 ---------- */
+header{
+  position:sticky;top:0;z-index:50;height:56px;
+  display:flex;align-items:center;gap:16px;padding:0 20px;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.mono{
+  width:32px;height:32px;border-radius:9px;flex:0 0 32px;
+  background:linear-gradient(135deg,#14b8a6,#0ea5a4);
+  color:#fff;font-weight:700;font-size:1.05rem;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(20,184,166,.28);
+}
+.brand b{font-size:1.05rem;font-weight:700;letter-spacing:.3px}
+.brand small{color:var(--muted);font-weight:400;font-size:.9rem}
+nav.tabs{display:flex;gap:4px;margin-left:8px}
+nav.tabs button{
+  font:inherit;font-size:.95rem;border:none;background:transparent;color:var(--muted);
+  padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:.15s;
+}
+nav.tabs button:hover{background:#f1f1ee;color:var(--text)}
+nav.tabs button.on{background:var(--tint);color:var(--accent);font-weight:600}
+header .spacer{flex:1}
+#editBtn{
+  font:inherit;font-size:.92rem;border:1px solid var(--border-strong);background:#fff;color:var(--text);
+  padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:.15s;
+}
+#editBtn:hover{border-color:var(--accent);color:var(--accent)}
+#editBtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+#openExt{display:none;align-items:center;gap:6px;font-size:.92rem;color:var(--muted);text-decoration:none;white-space:nowrap;padding:6px 10px;border-radius:8px}
+#openExt:hover{color:var(--accent);background:var(--tint)}
+
+/* ---------- 编辑提示条 ---------- */
+.editbar{
+  position:fixed;top:56px;left:0;right:0;z-index:49;
+  display:flex;align-items:center;gap:12px;padding:8px 20px;
+  background:#e1f7f0;border-bottom:1px solid #bde8dd;
+  font-size:.9rem;color:#0d7d6e;box-shadow:0 4px 12px rgba(0,0,0,.05);
+}
+.editbar .hint{display:flex;align-items:center;gap:8px}
+.editbar .spacer{flex:1}
+.editbar button{
+  font:inherit;font-size:.88rem;border:1px solid #bde8dd;background:#fff;color:#0d7d6e;
+  padding:5px 12px;border-radius:7px;cursor:pointer;transition:.15s;
+}
+.editbar button:hover{background:#d3f2ea}
+.editbar button.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.editbar button.done:hover{background:var(--accent-h)}
+
+/* ---------- 主区 ---------- */
+main{min-height:calc(100vh - 56px)}
+section.home{max-width:1060px;margin:0 auto;padding:40px 22px 70px}
+section.toolpage{padding:0}
+
+/* 过渡 */
+.page{animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Hero ---------- */
+.hero{
+  position:relative;overflow:hidden;
+  border-radius:22px;color:#fff;padding:44px 40px;
+  background:linear-gradient(135deg,#14b8a6 0%,#0ea5a4 55%,#34d399 100%);
+  box-shadow:0 18px 48px rgba(20,184,166,.25);
+}
+.hero::after{
+  content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;
+  background:radial-gradient(circle,rgba(255,255,255,.20),transparent 70%);
+}
+.hero .avatar{
+  width:64px;height:64px;border-radius:18px;font-size:1.7rem;font-weight:700;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+}
+.hero h1{font-size:2.5rem;margin:0 0 6px;font-weight:800;letter-spacing:1px}
+.hero .tag{font-size:1.05rem;margin:0 0 18px;color:rgba(255,255,255,.92);font-weight:500}
+.hero .intro{font-size:.98rem;max-width:640px;margin:0 0 22px;color:rgba(255,255,255,.88)}
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap}
+.hero-tags span{
+  font-size:.82rem;padding:4px 12px;border-radius:999px;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+}
+
+/* ---------- 工具合集 ---------- */
+.sec-title{font-size:1.45rem;margin:40px 0 4px;font-weight:700}
+.sec-sub{color:var(--muted);margin:0 0 20px;font-size:.95rem}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.tool-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px 24px 20px;display:flex;flex-direction:column;gap:12px;
+  transition:.18s;position:relative;
+}
+.tool-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(31,35,40,.08);border-color:var(--border-strong)}
+.tile{
+  width:52px;height:52px;border-radius:14px;font-size:1.5rem;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--tc,#e1f7f0);
+}
+.tool-card h3{margin:0;font-size:1.12rem;font-weight:700}
+.tool-card p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.7;flex:1}
+.actions{display:flex;align-items:center;gap:14px;margin-top:6px}
+.actions .open{
+  font:inherit;font-size:.95rem;font-weight:600;border:none;cursor:pointer;
+  background:var(--accent);color:#fff;padding:9px 18px;border-radius:9px;transition:.15s;
+}
+.actions .open:hover{background:var(--accent-h)}
+.actions a{font-size:.92rem;color:var(--muted);text-decoration:none}
+.actions a:hover{color:var(--accent)}
+
+/* ---------- 工具页 iframe ---------- */
+section.toolpage iframe{width:100%;height:calc(100vh - 56px);border:0;display:block;background:#fff}
+
+/* ---------- 页脚 ---------- */
+footer{text-align:center;color:var(--muted);font-size:.86rem;padding:6px 0 30px}
+
+/* ---------- 编辑模式 ---------- */
+body.editing [data-edit]{
+  outline:1.5px dashed rgba(20,184,166,.6);
+  outline-offset:4px;border-radius:6px;cursor:text;min-width:1ch;
+  transition:background .15s;
+}
+body.editing [data-edit]:hover{background:rgba(20,184,166,.08)}
+body.editing [data-edit]:empty::before{content:attr(data-ph);opacity:.5}
+body.editing .hero [data-edit]{outline-color:rgba(255,255,255,.8)}
+body.editing .hero [data-edit]:hover{background:rgba(255,255,255,.14)}
+body.editing .hero [data-edit]:empty::before{color:rgba(255,255,255,.6)}
+body.editing .hero-tags{
+  display:inline-block;min-width:160px;min-height:34px;gap:0;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);
+  border-radius:10px;padding:5px 12px;outline:1.5px dashed rgba(255,255,255,.8);outline-offset:4px;
+}
+body.editing .tool-card:hover{transform:none}
+
+@media(max-width:640px){
+  header{gap:8px;padding:0 12px}
+  .brand small{display:none}
+  nav.tabs{margin-left:0}
+  nav.tabs button{padding:7px 9px}
+  .hero{padding:30px 24px}
+  .hero h1{font-size:2rem}
+  .editbar{padding:8px 12px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="mono" id="avatarMono">育</span>
+    <b><span data-edit="name">育卓</span><small>· <span data-edit="siteName">个人站</span></small></b>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-page="home" class="on">首页</button>
+    <button data-page="novel">网文写作助手</button>
+    <button data-page="job">求职追踪</button>
+  </nav>
+  <span class="spacer"></span>
+  <button id="editBtn">✎ 编辑</button>
+  <a id="openExt" href="novel-writer.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+</header>
+
+<div class="editbar" id="editbar" hidden>
+  <span class="hint">✎ 编辑模式：点击任意文字直接修改，改动自动保存</span>
+  <span class="spacer"></span>
+  <button id="resetBtn">恢复默认</button>
+  <button class="done" id="doneBtn">完成</button>
+</div>
+
+<main>
+  <!-- ============ 首页 ============ -->
+  <section class="home page" id="page-home">
+    <div class="hero">
+      <div class="avatar" id="avatarHero">育</div>
+      <h1 data-edit="name" data-ph="你的名字">育卓</h1>
+      <p class="tag" data-edit="tagline" data-ph="一句话介绍">游戏 · 电竞 · 赛事运营 / 项目管理</p>
+      <p class="intro" data-edit="intro" data-ph="写一段自我介绍">你好，我是育卓。深耕游戏与电竞行业，专注赛事运营、项目管理与电竞商务。这里是我的个人小站，也收纳了我常用的自制小工具。</p>
+      <div class="hero-tags" data-edit="tags" data-ph="标签（用顿号分隔）"></div>
+    </div>
+
+    <h2 class="sec-title" data-edit="secTitle" data-ph="区块标题">工具合集</h2>
+    <p class="sec-sub" data-edit="secSub" data-ph="区块说明">自己动手做的小工具，数据只保存在本机浏览器，随用随开，不必联网。</p>
+    <div class="tools">
+      <article class="tool-card">
+        <div class="tile" style="--tc:#e1f7f0">✍️</div>
+        <h3 data-edit="card-title" data-i="0">网文写作助手</h3>
+        <p data-edit="card-desc" data-i="0">多作品长篇小说创作台：大纲、人物、世界观、伏笔、时间线一应俱全；章节沉浸式写作，打字 / 写作双计时，本地自动保存。</p>
+        <div class="actions">
+          <button class="open" data-go="novel">打开工具</button>
+          <a href="novel-writer.html" target="_blank" rel="noopener">新窗口 ↗</a>
+        </div>
+      </article>
+      <article class="tool-card">
+        <div class="tile" style="--tc:#d3f2ea">🎯</div>
+        <h3 data-edit="card-title" data-i="1">求职追踪</h3>
+        <p data-edit="card-desc" data-i="1">社招投递进度管理：内置 130+ 互联网 / 游戏 / 电竞公司，状态看板、筛选搜索、待办提醒、一键导出备份，数据仅存本机。</p>
+        <div class="actions">
+          <button class="open" data-go="job">打开工具</button>
+          <a href="job-tracker.html" target="_blank" rel="noopener">新窗口 ↗</a>
+        </div>
+      </article>
+    </div>
+    <footer data-edit="footer" data-ph="页脚文字">© 2026 育卓 · 本地小站 · 数据只存于你的浏览器</footer>
+  </section>
+
+  <!-- ============ 工具页 ============ -->
+  <section class="toolpage page" id="page-novel" hidden>
+    <iframe id="frame-novel" data-src="novel-writer.html" title="网文写作助手"></iframe>
+  </section>
+  <section class="toolpage page" id="page-job" hidden>
+    <iframe id="frame-job" data-src="job-tracker.html" title="求职追踪"></iframe>
+  </section>
+</main>
+
+<script>
+(function(){
+  var LSKEY='yuzhuo.site.v1';
+  var DEFAULT={
+    name:'育卓', siteName:'个人站',
+    tagline:'游戏 · 电竞 · 赛事运营 / 项目管理',
+    intro:'你好，我是育卓。深耕游戏与电竞行业，专注赛事运营、项目管理与电竞商务。这里是我的个人小站，也收纳了我常用的自制小工具。',
+    tags:['赛事运营','项目管理','电竞商务'],
+    secTitle:'工具合集',
+    secSub:'自己动手做的小工具，数据只保存在本机浏览器，随用随开，不必联网。',
+    footer:'© 2026 育卓 · 本地小站 · 数据只存于你的浏览器',
+    cards:[
+      {title:'网文写作助手', desc:'多作品长篇小说创作台：大纲、人物、世界观、伏笔、时间线一应俱全；章节沉浸式写作，打字 / 写作双计时，本地自动保存。'},
+      {title:'求职追踪', desc:'社招投递进度管理：内置 130+ 互联网 / 游戏 / 电竞公司，状态看板、筛选搜索、待办提醒、一键导出备份，数据仅存本机。'}
+    ]
+  };
+
+  var pages=['home','novel','job'];
+  var titles={home:'首页', novel:'网文写作助手', job:'求职追踪'};
+  var srcs={novel:'novel-writer.html', job:'job-tracker.html'};
+  var editing=false;
+
+  /* ---------- 工具函数 ---------- */
+  function clone(x){ return JSON.parse(JSON.stringify(x)); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function load(){
+    try{ var s=localStorage.getItem(LSKEY); if(s){ return merge(DEFAULT, JSON.parse(s)); } }catch(e){}
+    return clone(DEFAULT);
+  }
+  function merge(base,o){
+    var out=clone(base);
+    for(var k in o){
+      if(k==='cards' && Array.isArray(o.cards)){
+        out.cards=o.cards.map(function(c,i){ var b=base.cards[i]||{title:'',desc:''}; return {title:c.title!=null?c.title:b.title, desc:c.desc!=null?c.desc:b.desc}; });
+      } else if(o[k]!=null){ out[k]=o[k]; }
+    }
+    return out;
+  }
+  function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(content)); }catch(e){} }
+
+  var content=load();
+
+  function setText(el, val){
+    if(!el) return;
+    el.innerHTML=esc(val).replace(/\n/g,'<br>');
+  }
+  function getText(el){
+    return el.innerText.replace(/\u00a0/g,' ').trim();
+  }
+  function updateAvatar(){
+    var ch=(content.name||'育').trim().charAt(0)||'育';
+    var a=document.getElementById('avatarMono'); if(a) a.textContent=ch;
+    var b=document.getElementById('avatarHero'); if(b) b.textContent=ch;
+  }
+  function updateDocTitle(){ document.title=content.name+' · '+content.siteName; }
+
+  /* ---------- 渲染 ---------- */
+  function renderTags(){
+    var box=document.querySelector('.hero-tags');
+    if(!box) return;
+    if(editing){
+      box.contentEditable='true';
+      box.textContent=(content.tags||[]).join('、');
+    }else{
+      box.contentEditable='false';
+      box.innerHTML=(content.tags||[]).map(function(t){ return '<span>'+esc(t)+'</span>'; }).join('');
+    }
+  }
+  function applyContent(){
+    document.querySelectorAll('[data-edit="name"]').forEach(function(el){ setText(el, content.name); });
+    document.querySelectorAll('[data-edit="siteName"]').forEach(function(el){ setText(el, content.siteName); });
+    setText(document.querySelector('[data-edit="tagline"]'), content.tagline);
+    setText(document.querySelector('[data-edit="intro"]'), content.intro);
+    setText(document.querySelector('[data-edit="secTitle"]'), content.secTitle);
+    setText(document.querySelector('[data-edit="secSub"]'), content.secSub);
+    setText(document.querySelector('[data-edit="footer"]'), content.footer);
+    content.cards.forEach(function(c,i){
+      setText(document.querySelector('[data-edit="card-title"][data-i="'+i+'"]'), c.title);
+      setText(document.querySelector('[data-edit="card-desc"][data-i="'+i+'"]'), c.desc);
+    });
+    renderTags();
+    updateAvatar();
+    updateDocTitle();
+  }
+
+  /* ---------- 编辑开关 ---------- */
+  function setEditing(on){
+    editing=on;
+    document.body.classList.toggle('editing', on);
+    document.getElementById('editbar').hidden=!on;
+    var btn=document.getElementById('editBtn');
+    btn.textContent=on?'✓ 完成':'✎ 编辑';
+    btn.classList.toggle('on', on);
+    document.querySelectorAll('[data-edit]').forEach(function(el){
+      el.contentEditable=on?'true':'false';
+    });
+    renderTags();   // tags 在编辑/非编辑态结构不同
+    if(!on) save();
+  }
+
+  /* ---------- 实时保存 ---------- */
+  function syncSame(field, current, val){
+    document.querySelectorAll('[data-edit="'+field+'"]').forEach(function(el){
+      if(el!==current) el.textContent=val;
+    });
+  }
+  document.addEventListener('input', function(e){
+    if(!editing) return;
+    var el=e.target.closest('[data-edit]'); if(!el) return;
+    var f=el.getAttribute('data-edit');
+    if(f==='name'){ content.name=getText(el); syncSame('name', el, content.name); updateAvatar(); }
+    else if(f==='siteName'){ content.siteName=getText(el); syncSame('siteName', el, content.siteName); }
+    else if(f==='tags'){ content.tags=getText(el).split(/[,，、\s]+/).filter(Boolean); }
+    else if(f==='card-title'){ content.cards[+el.getAttribute('data-i')].title=getText(el); }
+    else if(f==='card-desc'){ content.cards[+el.getAttribute('data-i')].desc=getText(el); }
+    else{ content[f]=getText(el); }
+    updateDocTitle();
+    save();
+  });
+  /* 粘贴只保留纯文本 */
+  document.addEventListener('paste', function(e){
+    if(!editing) return;
+    var el=e.target.closest('[data-edit]'); if(!el) return;
+    e.preventDefault();
+    var t=(e.clipboardData||window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, t);
+  });
+  /* 单行字段阻止回车换行 */
+  document.addEventListener('keydown', function(e){
+    if(!editing || e.key!=='Enter') return;
+    var el=e.target.closest('[data-edit]'); if(!el) return;
+    var f=el.getAttribute('data-edit');
+    if(f!=='intro' && f!=='card-desc'){ e.preventDefault(); }
+  });
+
+  /* ---------- 路由 ---------- */
+  function go(p){
+    if(pages.indexOf(p)<0) p='home';
+    if(editing && p!=='home') setEditing(false);
+    document.querySelectorAll('#tabs button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-page')===p);
+    });
+    pages.forEach(function(k){ document.getElementById('page-'+k).hidden=(k!==p); });
+    var ext=document.getElementById('openExt');
+    if(p==='home'){ ext.style.display='none'; }
+    else{
+      ext.style.display='flex'; ext.href=srcs[p];
+      var ifr=document.getElementById('frame-'+p);
+      if(ifr && !ifr.src) ifr.src=ifr.getAttribute('data-src');
+    }
+    updateDocTitle();
+    window.scrollTo(0,0);
+  }
+
+  document.getElementById('tabs').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-page]'); if(!b) return;
+    go(b.getAttribute('data-page'));
+  });
+  document.getElementById('page-home').addEventListener('click',function(e){
+    var b=e.target.closest('[data-go]'); if(!b) return;
+    go(b.getAttribute('data-go'));
+  });
+  document.getElementById('editBtn').addEventListener('click',function(){
+    if(editing){ setEditing(false); return; }
+    go('home'); setEditing(true);
+  });
+  document.getElementById('doneBtn').addEventListener('click',function(){ setEditing(false); });
+  document.getElementById('resetBtn').addEventListener('click',function(){
+    if(!confirm('恢复为默认内容？你已编辑的内容会被覆盖。')) return;
+    content=clone(DEFAULT); applyContent(); save();
+  });
+
+  /* ---------- 启动 ---------- */
+  applyContent();
+})();
+</script>
+</body>
+</html>
