@@ -1,0 +1,2240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>网文写作助手</title>
+<style>html{font-size:clamp(13px, 0.5vw + 9px, 17.5px)}
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0;font:1rem/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f2faf7;color:#10322b;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#bcd9cf;border-radius:6px;border:2px solid #f2faf7}
+::-webkit-scrollbar-thumb:hover{background:#9ec9bd}
+
+#topbar{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;background:#fff;border-bottom:1px solid #dcebe6;position:sticky;top:0;z-index:40}
+.logo{font-weight:700;font-size:1.071rem;letter-spacing:.5px;color:#14b8a6;white-space:nowrap}
+.logo small{color:#6b8b82;font-weight:400;margin-left:6px;font-size:0.857rem}
+#workSel{max-width:200px}
+#saveTip{font-size:0.857rem;color:#6b8b82;min-width:96px}
+.spacer{flex:1}
+#gsearch{width:220px}
+
+#app{display:flex;height:calc(100vh - 52px)}
+#side{width:168px;flex:0 0 168px;background:#e6f5ef;border-right:1px solid #dcebe6;overflow:auto;padding:10px 8px 30px}
+.navgrp{font-size:0.786rem;color:#6b8b82;letter-spacing:1px;margin:12px 0 4px 8px}
+.navitem{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;color:#1f4a40;font-size:0.964rem;user-select:none}
+.navitem:hover{background:#d3ede4}
+.navitem.on{background:#14b8a6;color:#fff}
+.navitem .ic{width:16px;text-align:center;opacity:.85}
+.navitem .bd{margin-left:auto;font-size:0.786rem;background:#bcd9cf;color:#35544a;border-radius:9px;padding:0 6px;line-height:16px}
+.navitem.on .bd{background:rgba(255,255,255,.28);color:#fff}
+
+#view{flex:1;overflow:auto;padding:18px 20px 60px}
+.page{width:100%;max-width:none;margin:0}
+.h1{font-size:1.357rem;font-weight:700;margin:0 0 2px}
+.sub{color:#6b8b82;font-size:0.893rem;margin-bottom:14px}
+.card{background:#fff;border:1px solid #dcebe6;border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:1.000rem;display:flex;align-items:center;gap:8px}
+.card h3 .spacer{flex:1}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+
+button,.btn{font:inherit;cursor:pointer;border:1px solid #c2d8d0;background:#fff;color:#1f4a40;border-radius:7px;padding:5px 11px;font-size:0.929rem;transition:.12s}
+button:hover,.btn:hover{background:#eefaf6;border-color:#b0d2c8}
+.btn.pri{background:#14b8a6;border-color:#14b8a6;color:#fff}
+.btn.pri:hover{background:#0d9488}
+.btn.gh{border-color:transparent;background:transparent;color:#5b8a80}
+.btn.gh:hover{background:#e6f5ef;color:#1f4a40}
+.btn.dg{color:#b0402f;border-color:#e6cfc9}
+.btn.dg:hover{background:#fdf1ee}
+.btn.sm{padding:2px 8px;font-size:0.857rem;border-radius:6px}
+.inp,input.inp,select.inp,textarea.inp{width:100%;font:inherit;color:#10322b;background:#fbfefd;border:1px solid #c2d8d0;border-radius:7px;padding:6px 9px;outline:none}
+.inp:focus{border-color:#34d399;background:#fff}
+textarea.inp{resize:vertical;line-height:1.75}
+input.inp.w-sm,select.inp.w-sm{width:auto;display:inline-block}
+
+.frow{display:block;margin-bottom:9px}
+.frow>span{display:block;font-size:0.857rem;color:#5b8a80;margin-bottom:3px}
+.frow.inline{display:flex;align-items:center;gap:8px}
+.frow.inline>span{margin:0;min-width:62px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+
+.split{display:flex;gap:12px;align-items:stretch}
+.pane{background:#fff;border:1px solid #dcebe6;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+.pane .ph{padding:8px 12px;border-bottom:1px solid #dcebe6;font-size:0.893rem;color:#5b8a80;display:flex;align-items:center;gap:6px;background:#f5fbf8}
+.pane .pb{flex:1;overflow:auto}
+
+.tree{width:210px;flex:0 0 210px}
+.chnode{padding:6px 12px;cursor:pointer;font-size:0.929rem;border-left:3px solid transparent;display:flex;gap:6px;align-items:center}
+.chnode:hover{background:#eefaf6}
+.chnode.on{background:#e1f7f0;border-left-color:#14b8a6;color:#0d9488;font-weight:600}
+.vol{font-size:0.821rem;color:#6b8b82;padding:8px 12px 3px;letter-spacing:.5px}
+.chnode .n{color:#7fb0a2;font-size:0.786rem;margin-left:auto}
+
+.outline{width:300px;flex:0 0 300px}
+.tabs{display:flex;gap:4px;padding:6px 8px 0;border-bottom:1px solid #dcebe6;background:#f5fbf8}
+.tab{padding:5px 10px;font-size:0.893rem;border-radius:6px 6px 0 0;cursor:pointer;color:#5b8a80;border:1px solid transparent;border-bottom:none;position:relative;top:1px}
+.tab.on{background:#fff;border-color:#dcebe6;color:#14b8a6;font-weight:600}
+.quick{padding:6px}
+.qitem{padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.929rem;border:1px solid transparent}
+.qitem:hover{background:#eefaf6;border-color:#dcebe6}
+.qitem b{font-weight:600}
+.qitem em{font-style:normal;color:#6b8b82;font-size:0.821rem;margin-left:5px}
+.qdesc{font-size:0.821rem;color:#6b8b82;line-height:1.5;max-height:0;overflow:hidden;transition:.15s}
+.qitem.open .qdesc{max-height:120px;margin-top:4px}
+
+.editor{flex:1;min-width:340px}
+#cTitle{font-size:1.214rem;font-weight:700;border:none;background:transparent;padding:6px 12px;border-bottom:1px solid #e6f5ef;border-radius:0}
+#cTitle:focus{background:#fbfefd}
+#cBody{flex:1;border:none;border-radius:0;padding:14px 18px;font-family:"Songti SC","SimSun",Georgia,serif;font-size:1.143rem;line-height:2;min-height:420px;background:#ffffff}
+#cBody:focus{background:#ffffff}
+.statbar{display:flex;align-items:center;gap:12px;padding:7px 12px;border-top:1px solid #dcebe6;background:#f5fbf8;font-size:0.857rem;color:#5b8a80;flex-wrap:wrap}
+.statbar b{color:#1f4a40}
+.bar{height:6px;background:#dcebe6;border-radius:4px;overflow:hidden;width:110px}
+.bar i{display:block;height:100%;background:#14b8a6}
+
+table.tb{width:100%;border-collapse:collapse;font-size:0.929rem}
+table.tb th{text-align:left;font-weight:600;color:#5b8a80;font-size:0.857rem;padding:6px 8px;border-bottom:1px solid #dcebe6}
+table.tb td{padding:7px 8px;border-bottom:1px solid #f2faf7;vertical-align:top}
+table.tb tr:hover td{background:#f5fbf8}
+
+.list{display:flex;flex-direction:column;gap:6px}
+.li{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #dcebe6;border-radius:8px;background:#fff;cursor:pointer}
+.li:hover{border-color:#b0d2c8;background:#fbfefd}
+.li.on{border-color:#14b8a6;background:#e1f7f0}
+.li .t{font-weight:600}
+.li .m{color:#6b8b82;font-size:0.857rem}
+.li .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li .acts{display:flex;gap:4px;flex-shrink:0}
+
+.master{display:flex;gap:14px;align-items:flex-start}
+.master .mlist{width:270px;flex:0 0 270px}
+.master .mdetail{flex:1;min-width:0}
+
+.tagpill{display:inline-block;font-size:0.821rem;background:#e1f7f0;color:#6b8b82;border-radius:5px;padding:1px 7px;margin:0 4px 4px 0}
+.pill{display:inline-block;font-size:0.821rem;border-radius:20px;padding:1px 9px;line-height:19px;white-space:nowrap}
+.p-new{background:#eef3ec;color:#4c7a45}
+.p-wip{background:#fdf3e3;color:#9a6b1d}
+.p-done{background:#eaf1f7;color:#3e6d95}
+.p-drop{background:#f2faf7;color:#6b8b82}
+.p-red{background:#fbeae7;color:#b0402f}
+.p-gray{background:#f2faf7;color:#5b8a80}
+
+.empty{text-align:center;color:#7fb0a2;padding:26px 10px;font-size:0.929rem}
+.kpi{background:#fff;border:1px solid #dcebe6;border-radius:10px;padding:13px 15px}
+.kpi .v{font-size:1.714rem;font-weight:700;color:#14b8a6;line-height:1.2}
+.kpi .l{font-size:0.857rem;color:#6b8b82}
+
+.overlay{position:fixed;inset:0;background:rgba(16,50,43,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal{background:#fff;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.22);width:520px;max-width:100%;max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+.modal .mh{padding:14px 18px;border-bottom:1px solid #dcebe6;font-weight:600}
+.modal .mb{padding:16px 18px;overflow:auto}
+.modal .mf{padding:12px 18px;border-top:1px solid #dcebe6;display:flex;gap:8px;justify-content:flex-end}
+
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);background:#0f3d34;color:#fff;padding:9px 18px;border-radius:22px;font-size:0.929rem;opacity:0;pointer-events:none;transition:.2s;z-index:200}
+#toast.on{opacity:1;bottom:44px}
+
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,11px);gap:3px}
+.heat i{width:11px;height:11px;background:#dcebe6;border-radius:2px;display:block}
+.heat i[data-l="1"]{background:#d3f2ea}.heat i[data-l="2"]{background:#7fd4c2}.heat i[data-l="3"]{background:#34d399}.heat i[data-l="4"]{background:#14b8a6}
+.bars{display:flex;align-items:flex-end;gap:4px;height:120px}
+.bars .b{flex:1;background:#7fd4c2;border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.bars .b.today{background:#14b8a6}
+.hint{font-size:0.857rem;color:#6b8b82;line-height:1.7}
+mark{background:#ffe9a8;border-radius:2px;padding:0 1px}
+.rel{display:flex;gap:6px;align-items:center;margin-bottom:5px}
+.rel select{flex:1}
+.graphbox{background:#ffffff;border:1px solid #dcebe6;border-radius:10px;overflow:auto}
+
+/* ===== 写作页工具条 / 查找替换 ===== */
+.wtb{display:flex;align-items:center;gap:4px;padding:6px 10px;border-bottom:1px solid #dcebe6;background:#f5fbf8;flex-wrap:wrap}
+.wtb .sep{width:1px;height:18px;background:#dcebe6;margin:0 4px}
+.findbar{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid #dcebe6;background:#e1f7f0;flex-wrap:wrap}
+.findbar input.inp{width:150px}
+.findbar .cnt{font-size:0.857rem;color:#5b8a80;min-width:70px}
+.tm{font-variant-numeric:tabular-nums;font-weight:600;color:#1f4a40}
+.tm.pause{color:#7fb0a2;font-weight:400}
+
+/* ===== 沉浸式全屏写作 ===== */
+body.immersive #topbar,body.immersive #side{display:none !important}
+body.immersive #app{height:100vh}
+body.immersive{overflow:hidden}
+body.immersive #view{padding:0;background:#f2faf7}
+body.immersive .page{max-width:none;height:100vh;display:flex;flex-direction:column}
+body.immersive .page>.sub,body.immersive .page>.h1{display:none}
+body.immersive .split{flex:1;min-height:0;padding:0;gap:0}
+body.immersive .tree,body.immersive .outline{display:none}
+body.immersive .split.show-side .tree{display:flex}
+body.immersive .editor{border:none;border-radius:0;max-width:min(1080px,96%);margin:0 auto;box-shadow:0 0 0 1px #dcebe6}
+body.immersive #cBody{font-size:1.250rem;line-height:2.15;padding:26px 34px 60vh;min-height:0}
+body.immersive .statbar{position:sticky;bottom:0}
+.immbar{display:none;position:fixed;top:10px;right:14px;gap:6px;z-index:60;background:rgba(255,255,255,.94);border:1px solid #dcebe6;border-radius:9px;padding:5px 8px;box-shadow:0 4px 16px rgba(0,0,0,.08);align-items:center}
+body.immersive .immbar{display:flex}
+.immbar .tm{font-size:0.929rem}
+
+/* ===== 世界观地图编辑器 ===== */
+.mapwrap{display:flex;gap:14px;align-items:flex-start}
+.maplist{width:200px;flex:0 0 200px}
+.mapstage{flex:1;min-width:0}
+.maptb{display:flex;gap:5px;align-items:center;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid #dcebe6;background:#f5fbf8}
+.maptb .on{background:#14b8a6;border-color:#14b8a6;color:#fff}
+#mapCanvas{display:block;background:#fbfefd;cursor:crosshair;max-width:100%}
+.canvasbox{position:relative;overflow:auto;max-height:620px;background:#fbfefd;border-top:1px solid #dcebe6}
+.markside{width:250px;flex:0 0 250px;max-height:620px;overflow:auto}
+.mk{display:flex;gap:7px;align-items:flex-start;padding:7px 9px;border:1px solid #dcebe6;border-radius:8px;margin-bottom:6px;cursor:pointer;background:#fff}
+.mk:hover{border-color:#b0d2c8}
+.mk.on{border-color:#14b8a6;background:#e1f7f0}
+.mk .ico{font-size:1.214rem;line-height:1.2}
+.mkhint{font-size:0.821rem;color:#6b8b82;line-height:1.6}
+
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="logo">网文写作助手<small>local · 数据只存在这台电脑</small></div>
+  <select id="workSel" class="inp w-sm" title="切换作品"></select>
+  <button class="btn sm" data-act="work-manage">管理作品</button>
+  <span id="saveTip">已就绪</span>
+  <div class="spacer"></div>
+  <input id="gsearch" class="inp" placeholder="全局搜索（章节/人物/物品/设定）">
+  <button class="btn sm" data-act="go-backup">备份</button>
+</header>
+
+<div id="app">
+  <nav id="side"></nav>
+  <main id="view"></main>
+</div>
+
+<div id="modal" class="overlay" hidden><div class="modal">
+  <div class="mh" id="mTitle"></div>
+  <div class="mb" id="mBody"></div>
+  <div class="mf" id="mFoot"></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   网文写作助手 · 单文件本地版
+   存储：IndexedDB（库 novelwriter，表 works / meta）
+   ============================================================ */
+(function(){
+'use strict';
+
+/* ---------- 基础工具 ---------- */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function today(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function pad(n){ return n<10?'0'+n:''+n; }
+function nowHM(){ var d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
+function wc(s){ if(!s) return 0; var m=String(s).match(/[\u4e00-\u9fa5\u3040-\u30ff]|[A-Za-z0-9_'’-]+/g); return m?m.length:0; }
+function num(n){ return (n||0).toLocaleString('zh-CN'); }
+function daysAgo(n){ var d=new Date(); d.setDate(d.getDate()-n); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function $(s,r){ return (r||document).querySelector(s); }
+function $$(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
+function toast(msg){ var t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('on');},1900); }
+function insertAtCursor(ta,text){
+  var s=ta.selectionStart, e=ta.selectionEnd, v=ta.value;
+  ta.value=v.slice(0,s)+text+v.slice(e);
+  ta.selectionStart=ta.selectionEnd=s+text.length;
+  ta.focus();
+}
+
+/* ---------- IndexedDB ---------- */
+var DB=null;
+function idbOpen(){
+  return new Promise(function(res,rej){
+    var r=indexedDB.open('novelwriter',1);
+    r.onupgradeneeded=function(e){
+      var d=e.target.result;
+      if(!d.objectStoreNames.contains('works')) d.createObjectStore('works',{keyPath:'id'});
+      if(!d.objectStoreNames.contains('meta')) d.createObjectStore('meta',{keyPath:'k'});
+    };
+    r.onsuccess=function(e){ res(e.target.result); };
+    r.onerror=function(e){ rej(e); };
+  });
+}
+function tx(store,mode){ return DB.transaction(store,mode).objectStore(store); }
+function idbPut(store,val){ return new Promise(function(res,rej){ var q=tx(store,'readwrite').put(val); q.onsuccess=function(){res(q.result);}; q.onerror=rej; }); }
+function idbGet(store,key){ return new Promise(function(res,rej){ var q=tx(store,'readonly').get(key); q.onsuccess=function(){res(q.result);}; q.onerror=rej; }); }
+function idbAll(store){ return new Promise(function(res,rej){ var q=tx(store,'readonly').getAll(); q.onsuccess=function(){res(q.result||[]);}; q.onerror=rej; }); }
+function idbDel(store,key){ return new Promise(function(res,rej){ var q=tx(store,'readwrite').delete(key); q.onsuccess=function(){res();}; q.onerror=rej; }); }
+
+/* ---------- 数据模型 ---------- */
+var CH_STATUS=['草稿','连载中','已定稿'];
+var ITEM_TYPES=['金手指','武器','防具','功法','丹药','材料','道具','阵法','传承','其他'];
+var WORLD_CATS=['地理·地图','历史·传说','修炼体系','种族·血脉','风俗·文化','规则·禁忌','经济·货币','其他'];
+var FS_STATUS=['未回收','已回收','废弃'];
+
+function newWork(title){
+  var vid=uid(), cid=uid();
+  return {
+    id:uid(), title:title||'未命名作品', genre:'', penname:'', platform:'',
+    logline:'', tags:'', target:'', note:'',
+    outline:'',
+    volumes:[{id:vid,title:'第一卷',desc:''}],
+    chapters:[{id:cid,volumeId:vid,title:'第一章',outline:'',content:'',status:'草稿',words:0,note:'',updatedAt:Date.now()}],
+    characters:[], items:[], world:[], factions:[], timeline:[], maps:[],
+    foreshadow:[], ideas:[], prompts:[], feedback:[], sensitive:[],
+    stats:{ goal:2000, daily:{}, idleSec:30 },
+    createdAt:Date.now(), updatedAt:Date.now()
+  };
+}
+var ARRAYS=['volumes','chapters','characters','items','world','factions','timeline','maps','foreshadow','ideas','prompts','feedback'];
+function normalize(w){
+  ARRAYS.forEach(function(k){ if(!Array.isArray(w[k])) w[k]=[]; });
+  if(!w.stats) w.stats={goal:2000,daily:{},idleSec:30};
+  if(!w.stats.daily) w.stats.daily={};
+  if(w.stats.idleSec==null) w.stats.idleSec=30;
+  if(!Array.isArray(w.sensitive)) w.sensitive=[];
+  return w;
+}
+
+/* ---------- 状态 ---------- */
+var state={
+  works:[],          // 简要列表
+  work:null,         // 当前作品全量对象
+  view:'dash',
+  sel:{},            // 各模块当前选中 id
+  tab:{outline:'char',q:'char'},
+  editing:null,      // 详情面板正在编辑的对象引用
+  saving:false,
+  search:'',
+  timer:null,
+  /* 写作计时：打字时间（停止输入自动暂停） / 写作时间（在写作页就累计） */
+  sess:{ typeSec:0, writeSec:0, lastKey:0, typeRun:false, writeRun:false,
+         manualPause:false, flushedType:0, flushedWrite:0, pend:0 },
+  undo:[], redo:[], lastUndoPush:0,   // 自维护的撤销栈（程序化改动会破坏浏览器原生 undo）
+  findOpen:false,
+  immSide:false,
+  /* 世界观子页签 / 地图编辑器状态 */
+  worldTab:'item', mapTool:'select', mapType:0, mapLink:null, mapSel:null,
+  mapDrag:null, mapMoved:false, mapMouse:null, _mapUp:false
+};
+
+/* ---------- 保存 ---------- */
+var saveTimer=null;
+function scheduleSave(){
+  state.saving=true; $('#saveTip').textContent='保存中…';
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(flushSave,700);
+}
+function flushSave(){
+  if(!state.work) return;
+  state.work.updatedAt=Date.now();
+  idbPut('works',state.work).then(function(){
+    state.saving=false; $('#saveTip').textContent='已保存 '+nowHM();
+  }).catch(function(e){ $('#saveTip').textContent='保存失败'; console.error(e); });
+}
+function addWords(n,minutes){
+  if(!state.work) return;
+  var d=state.work.stats.daily[today()];
+  if(!d){ d=state.work.stats.daily[today()]={words:0,minutes:0}; }
+  if(n) d.words=Math.max(0,(d.words||0)+n);   /* 正文增减同步；删除也往下扣，但不为负 */
+  if(minutes) d.minutes=(d.minutes||0)+minutes;
+}
+
+/* ---------- 导航 ---------- */
+var NAV=[
+  {g:'剧情',items:[
+    {k:'dash',  n:'总览',   ic:'◎'},
+    {k:'outline',n:'主线大纲',ic:'≡'},
+    {k:'write', n:'章节写作',ic:'✎'}
+  ]},
+  {g:'设定',items:[
+    {k:'char',  n:'人物小记', ic:'☺'},
+    {k:'item',  n:'物品道具', ic:'⚒'},
+    {k:'world', n:'世界观',   ic:'⛰'},
+    {k:'faction',n:'势力组织',ic:'⚑'},
+    {k:'time',  n:'时间线',   ic:'⏱'}
+  ]},
+  {g:'工具',items:[
+    {k:'fs',    n:'伏笔追踪', ic:'⚓'},
+    {k:'idea',  n:'灵感箱',   ic:'✦'},
+    {k:'prompt',n:'提示词库', ic:'⌘'},
+    {k:'fb',    n:'读者反馈', ic:'✉'},
+    {k:'graph', n:'关系图谱', ic:'⁂'},
+    {k:'stat',  n:'写作统计', ic:'▤'},
+    {k:'sens',  n:'敏感词',   ic:'⚠'},
+    {k:'backup',n:'备份导出', ic:'⇩'}
+  ]}
+];
+function renderNav(){
+  var html='';
+  NAV.forEach(function(g){
+    html+='<div class="navgrp">'+g.g+'</div>';
+    g.items.forEach(function(it){
+      var badge='';
+      if(it.k==='fs'&&state.work){ var n=state.work.foreshadow.filter(function(f){return f.status!=='已回收'&&f.status!=='废弃';}).length; if(n) badge='<span class="bd">'+n+'</span>'; }
+      html+='<div class="navitem'+(state.view===it.k?' on':'')+'" data-act="nav" data-k="'+it.k+'"><span class="ic">'+it.ic+'</span>'+it.n+badge+'</div>';
+    });
+  });
+  $('#side').innerHTML=html;
+}
+function go(k){
+  if(state.view==='write'&&k!=='write') flushTime();
+  state.view=k; if(k==='write') ensureChapter(); render();
+}
+
+/* ---------- 渲染路由 ---------- */
+function render(){
+  renderNav(); renderWorkSel();
+  var v=$('#view'), w=state.work;
+  if(!w){ v.innerHTML='<div class="empty">还没有作品，点右上角「管理作品」新建一个。</div>'; return; }
+  var f={dash:vDash,outline:vOutline,write:vWrite,char:vChar,item:vItem,world:vWorld,faction:vFaction,time:vTime,fs:vFs,idea:vIdea,prompt:vPrompt,fb:vFb,graph:vGraph,stat:vStat,sens:vSens,backup:vBackup}[state.view]||vDash;
+  v.innerHTML='<div class="page">'+f(w)+'</div>';
+  if(state.view==='write') afterWrite();
+  else if(state.view==='graph') afterGraph();
+  else if(state.view==='backup') setTimeout(calcStore,0);
+  else if(state.view==='world'&&state.worldTab==='map') afterMap();
+  /* 写作时间：只在停留在写作页时累计，切走自动停 */
+  if(state.view==='write') state.sess.writeRun=!state.sess.manualPause;
+  else state.sess.writeRun=false;
+}
+function renderWorkSel(){
+  var s=$('#workSel');
+  s.innerHTML=state.works.map(function(w){ return '<option value="'+w.id+'"'+(state.work&&w.id===state.work.id?' selected':'')+'>'+esc(w.title)+'</option>'; }).join('');
+}
+
+/* ---------- 通用表单 ---------- */
+function fRow(label,key,val,opt){
+  opt=opt||{};
+  var v=esc(val==null?'':val), t=opt.type||'text';
+  if(t==='textarea') return '<label class="frow"><span>'+esc(label)+'</span><textarea class="inp" data-f="'+key+'" rows="'+(opt.rows||3)+'" placeholder="'+esc(opt.ph||'')+'">'+v+'</textarea></label>';
+  if(t==='select'){
+    var opts=(opt.opts||[]).map(function(o){ return '<option value="'+esc(o)+'"'+(String(val)===String(o)?' selected':'')+'>'+esc(o)+'</option>'; }).join('');
+    return '<label class="frow"><span>'+esc(label)+'</span><select class="inp" data-f="'+key+'">'+opts+'</select></label>';
+  }
+  return '<label class="frow"><span>'+esc(label)+'</span><input class="inp" data-f="'+key+'" type="text" value="'+v+'" placeholder="'+esc(opt.ph||'')+'"></label>';
+}
+function bindForm(root,obj,cb){
+  function set(el){ var k=el.getAttribute('data-f'); obj[k]=el.value; if(cb) cb(k,obj); }
+  root.addEventListener('input',function(e){ var el=e.target.closest('[data-f]'); if(el){ set(el); scheduleSave(); } });
+  root.addEventListener('change',function(e){ var el=e.target.closest('[data-f]'); if(el){ set(el); scheduleSave(); if(cb) cb(k2(el),obj,true); } });
+  function k2(el){ return el.getAttribute('data-f'); }
+}
+function detailShell(title,bodyHtml,extraBtns){
+  return '<div class="card"><h3>'+esc(title)+'<span class="spacer"></span>'+(extraBtns||'')+
+    '<button class="btn sm dg" data-act="del-cur">删除</button></h3>'+bodyHtml+'</div>';
+}
+function masterLayout(listHtml,detailHtml){
+  return '<div class="master"><div class="mlist">'+listHtml+'</div><div class="mdetail">'+detailHtml+'</div></div>';
+}
+
+/* ============================================================
+   视图：总览
+   ============================================================ */
+function vDash(w){
+  var total=0; w.chapters.forEach(function(c){ total+=c.words||wc(c.content); });
+  var openFS=w.foreshadow.filter(function(f){return f.status==='未回收';}).length;
+  var d=w.stats.daily[today()]||{words:0,minutes:0};
+  var goal=w.stats.goal||2000;
+  var pct=Math.min(100,Math.round(d.words/goal*100));
+  var recent=w.chapters.slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);}).slice(0,6);
+  var streak=0; for(var i=0;i<400;i++){ var k=daysAgo(i); if((w.stats.daily[k]||{}).words>0) streak++; else if(i>0) break; }
+
+  return ''+
+  '<div class="row" style="align-items:baseline"><h1 class="h1">'+esc(w.title)+'</h1>'+
+    '<span class="pill p-gray">'+esc(w.genre||'未分类')+'</span>'+
+    (w.platform?'<span class="pill p-gray">'+esc(w.platform)+'</span>':'')+
+    '<span class="spacer"></span>'+
+    '<button class="btn pri" data-act="nav" data-k="write">开始写作 →</button></div>'+
+  '<div class="sub">'+esc(w.logline||'还没写一句话简介，去「主线大纲」补上。')+'</div>'+
+
+  '<div class="grid g4" style="margin-bottom:14px">'+
+    kpi(num(total),'总字数')+
+    kpi(w.chapters.length,'章节数')+
+    kpi(w.characters.length,'人物')+
+    kpi(openFS,'待回收伏笔')+
+  '</div>'+
+
+  '<div class="grid g2">'+
+    '<div class="card"><h3>今日进度<span class="spacer"></span><span class="hint">目标 '+num(goal)+' 字</span></h3>'+
+      '<div class="row"><div class="bar" style="flex:1"><i style="width:'+pct+'%"></i></div><b>'+num(d.words)+'</b> 字 · '+pct+'%</div>'+
+      '<div class="hint" style="margin-top:8px">专注 '+(d.minutes||0)+' 分钟 · 连续打卡 '+streak+' 天</div>'+
+      '<div class="row" style="margin-top:10px">'+
+        '<button class="btn sm" data-act="pomo">🍅 番茄钟 25min</button>'+
+      '</div></div>'+
+    '<div class="card"><h3>待回收伏笔</h3>'+
+      (w.foreshadow.filter(function(f){return f.status==='未回收';}).slice(0,6).map(function(f){
+        return '<div class="li" data-act="open-fs" data-id="'+f.id+'"><span class="grow">'+esc(f.title)+'</span><span class="m">'+esc(f.plantedChapter||'-')+'</span><span class="pill '+(f.importance==='高'?'p-red':'p-gray')+'">'+esc(f.importance||'中')+'</span></div>';
+      }).join('')||'<div class="empty">没有待回收伏笔 ✓</div>')+
+    '</div>'+
+  '</div>'+
+
+  '<div class="card"><h3>最近编辑<span class="spacer"></span><button class="btn sm" data-act="new-chapter">+ 新章节</button></h3>'+
+    '<table class="tb"><thead><tr><th>章节</th><th>状态</th><th>字数</th><th>更新时间</th><th></th></tr></thead><tbody>'+
+    (recent.map(function(c){
+      return '<tr><td>'+esc(c.title)+'</td><td><span class="pill '+pillCls(c.status)+'">'+esc(c.status)+'</span></td>'+
+        '<td>'+num(c.words||wc(c.content))+'</td><td class="m">'+fmtTime(c.updatedAt)+'</td>'+
+        '<td style="text-align:right"><button class="btn sm" data-act="open-ch" data-id="'+c.id+'">去写</button></td></tr>';
+    }).join('')||'<tr><td colspan="5" class="empty">还没有章节</td></tr>')+
+    '</tbody></table></div>'+
+
+  '<div class="card"><h3>作品信息</h3><div class="f2">'+
+    fRow('书名','title',w.title)+
+    fRow('笔名','penname',w.penname)+
+    fRow('类型/频道','genre',w.genre,{ph:'玄幻 / 都市 / 无限流…'})+
+    fRow('发布平台','platform',w.platform,{ph:'起点 / 番茄 / 晋江…'})+
+    '</div>'+fRow('一句话简介（卖点）','logline',w.logline,{type:'textarea',rows:2})+
+    fRow('标签','tags',w.tags,{ph:'用空格分隔'})+'</div>';
+}
+function kpi(v,l){ return '<div class="kpi"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'; }
+function pillCls(s){ return s==='已定稿'?'p-done':s==='连载中'?'p-wip':'p-new'; }
+function fmtTime(t){ if(!t) return '-'; var d=new Date(t); return (d.getMonth()+1)+'/'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes()); }
+
+/* ============================================================
+   视图：主线大纲
+   ============================================================ */
+function vOutline(w){
+  var vols=w.volumes.map(function(v,i){
+    var cnt=w.chapters.filter(function(c){return c.volumeId===v.id;}).length;
+    var wds=w.chapters.filter(function(c){return c.volumeId===v.id;}).reduce(function(a,c){return a+(c.words||wc(c.content));},0);
+    return '<div class="li'+(state.sel.vol===v.id?' on':'')+'" data-act="sel-vol" data-id="'+v.id+'">'+
+      '<span class="grow"><b>'+esc(v.title)+'</b><span class="m"> · '+cnt+'章 / '+num(wds)+'字</span></span>'+
+      '<span class="acts"><button class="btn sm gh" data-act="vol-up" data-i="'+i+'">↑</button>'+
+      '<button class="btn sm gh" data-act="vol-down" data-i="'+i+'">↓</button></span></div>';
+  }).join('');
+  return '<h1 class="h1">主线大纲</h1><div class="sub">先搭骨架，再填血肉。分卷 → 章纲 → 正文。</div>'+
+  '<div class="card"><h3>分卷结构<span class="spacer"></span><button class="btn sm pri" data-act="new-vol">+ 新分卷</button></h3>'+
+    '<div class="list">'+vols+'</div>'+
+    '<div class="row" style="margin-top:10px">'+fRow('分卷名','_volTitle',(curVol(w)||{}).title,{ph:'选中一个分卷后可改名'})+'</div></div>'+
+  '<div class="card"><h3>主线 / 核心冲突</h3>'+
+    fRow('主线大纲','outline',w.outline,{type:'textarea',rows:14,ph:'起：……\n承：……\n转：……\n合：……\n\n主线目标 / 核心矛盾 / 阶段性小目标 / 结局走向'})+
+  '</div>'+
+  '<div class="card"><h3>创作备忘</h3>'+
+    '<div class="f2">'+fRow('目标字数','target',w.target)+fRow('标签/卖点','tags',w.tags)+'</div>'+
+    fRow('备注','note',w.note,{type:'textarea',rows:4})+'</div>';
+}
+function curVol(w){ return w.volumes.filter(function(v){return v.id===state.sel.vol;})[0]||w.volumes[0]||null; }
+function curCh(w){ return w.chapters.filter(function(c){return c.id===state.sel.ch;})[0]||w.chapters[0]||null; }
+function ensureChapter(){ if(!state.sel.ch&&state.work&&state.work.chapters[0]) state.sel.ch=state.work.chapters[0].id; }
+
+/* ============================================================
+   视图：章节写作（左右分栏）
+   ============================================================ */
+function vWrite(w){
+  var c=curCh(w);
+  // 章节树
+  var tree='';
+  w.volumes.forEach(function(v){
+    tree+='<div class="vol">'+esc(v.title)+'</div>';
+    w.chapters.filter(function(x){return x.volumeId===v.id;}).forEach(function(x,i){
+      tree+='<div class="chnode'+(c&&x.id===c.id?' on':'')+'" data-act="sel-ch" data-id="'+x.id+'">'+
+        '<span>'+esc(x.title)+'</span><span class="n">'+num(x.words||wc(x.content))+'</span></div>';
+    });
+    if(!w.chapters.filter(function(x){return x.volumeId===v.id;}).length) tree+='<div class="chnode" style="color:#7fb0a2">（空）</div>';
+  });
+  // 速查
+  var q=state.tab.q;
+  var qhtml='';
+  if(q==='char') qhtml=w.characters.map(function(x){ return qItem(x.id,x.name,x.role||'',(x.personality||x.appearance||'').slice(0,60)); }).join('');
+  else if(q==='item') qhtml=w.items.map(function(x){ return qItem(x.id,x.name,x.type||'',(x.effect||'').slice(0,60)); }).join('');
+  else if(q==='world') qhtml=w.world.map(function(x){ return qItem(x.id,x.title,x.category||'',(x.content||'').slice(0,60)); }).join('');
+  else qhtml=w.factions.map(function(x){ return qItem(x.id,x.name,x.type||'',(x.desc||'').slice(0,60)); }).join('');
+  if(!qhtml) qhtml='<div class="empty">还没有条目</div>';
+
+  var body='<div class="split'+(state.immSide?' show-side':'')+'" style="min-height:640px">'+
+    '<div class="pane tree"><div class="ph">章节<span class="spacer"></span><button class="btn sm gh" data-act="new-chapter">＋</button></div><div class="pb">'+tree+'</div></div>'+
+    '<div class="pane outline"><div class="ph">本章细纲 / 设定速查</div>'+
+      '<textarea class="inp" id="cOutline" data-f="outline" style="border:none;border-bottom:1px solid #dcebe6;border-radius:0;min-height:150px" placeholder="这一章要发生什么？开头钩子 / 冲突 / 结尾悬念…">'+esc(c?c.outline:'')+'</textarea>'+
+      '<div class="tabs">'+
+        [['char','人物'],['item','物品'],['world','设定'],['faction','势力']].map(function(t){
+          return '<div class="tab'+(q===t[0]?' on':'')+'" data-act="qtab" data-k="'+t[0]+'">'+t[1]+'</div>';
+        }).join('')+
+      '</div><div class="pb quick">'+qhtml+'</div></div>'+
+    '<div class="pane editor">'+
+      '<input class="inp" id="cTitle" value="'+esc(c?c.title:'')+'" placeholder="章节标题">'+
+      '<div class="wtb">'+
+        '<button class="btn sm" data-act="ed-undo" title="撤销 (Ctrl+Z)">↶ 撤销</button>'+
+        '<button class="btn sm" data-act="ed-redo" title="重做 (Ctrl+Y)">↷ 重做</button>'+
+        '<span class="sep"></span>'+
+        '<button class="btn sm" data-act="find-toggle" title="查找替换 (Ctrl+F)">🔍 查找替换</button>'+
+        '<button class="btn sm" data-act="fmt-all" title="清理空行 + 首行缩进 + 中英空格">一键排版</button>'+
+        '<button class="btn sm" data-act="fmt-indent">首行缩进</button>'+
+        '<button class="btn sm" data-act="fmt-clean">清理空行</button>'+
+        '<button class="btn sm" data-act="fmt-space">中英空格</button>'+
+        '<button class="btn sm" data-act="fmt-punct">标点全/半角</button>'+
+        '<button class="btn sm" data-act="ins-time">插入时间</button>'+
+        '<button class="btn sm" data-act="ed-stat">字数统计</button>'+
+        '<span class="sep"></span>'+
+        '<button class="btn sm pri" data-act="toggle-imm" title="沉浸式全屏 (Alt+Enter)">⛶ 沉浸写作</button>'+
+      '</div>'+
+      '<div class="findbar" id="findbar"'+(state.findOpen?'':' hidden')+'>'+
+        '<input class="inp" id="fFind" placeholder="查找内容">'+
+        '<input class="inp" id="fRep" placeholder="替换为">'+
+        '<label class="frow inline" style="margin:0"><input type="checkbox" id="fCase"> 区分大小写</label>'+
+        '<span class="cnt" id="fCnt">—</span>'+
+        '<button class="btn sm" data-act="f-prev">↑ 上一个</button>'+
+        '<button class="btn sm" data-act="f-next">↓ 下一个</button>'+
+        '<button class="btn sm" data-act="f-rep">替换</button>'+
+        '<button class="btn sm" data-act="f-repall">全部替换</button>'+
+        '<button class="btn sm gh" data-act="find-toggle">✕</button>'+
+      '</div>'+
+      '<div class="ph" style="border-top:1px solid #dcebe6">'+
+        '<select class="inp w-sm" id="cStatus">'+CH_STATUS.map(function(s){return '<option'+(c&&c.status===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'+
+        '<select class="inp w-sm" id="cVol">'+w.volumes.map(function(v){return '<option value="'+v.id+'"'+(c&&c.volumeId===v.id?' selected':'')+'>'+esc(v.title)+'</option>';}).join('')+'</select>'+
+        '<span class="spacer"></span>'+
+        '<button class="btn sm" data-act="prev-ch">← 上一章</button><button class="btn sm" data-act="next-ch">下一章 →</button>'+
+      '</div>'+
+      '<textarea id="cBody" placeholder="正文从这里开始…" spellcheck="false">'+esc(c?c.content:'')+'</textarea>'+
+      '<div class="statbar">'+
+        '<span>本章 <b id="sWords">'+num(wc(c?c.content:''))+'</b> 字</span>'+
+        '<span>全书 <b id="sTotal">'+num(w.chapters.reduce(function(a,x){return a+(x.words||wc(x.content));},0))+'</b> 字</span>'+
+        '<span>今日 <b id="sToday">'+num((w.stats.daily[today()]||{}).words||0)+'</b> / '+num(w.stats.goal||2000)+'</span>'+
+        '<span class="bar"><i id="sBar" style="width:'+Math.min(100,Math.round(((w.stats.daily[today()]||{}).words||0)/(w.stats.goal||2000)*100))+'%"></i></span>'+
+        '<span class="sep"></span>'+
+        '<span title="只在敲键盘时累计，停手 '+idleSec()+' 秒自动暂停">打字 <b class="tm'+(state.sess.typeRun?'':' pause')+'" id="sType">'+fmtDur(state.sess.typeSec)+'</b></span>'+
+        '<span title="停留在写作页就累计，含思考与查资料的时间">写作 <b class="tm'+(state.sess.writeRun?'':' pause')+'" id="sWrite">'+fmtDur(state.sess.writeSec)+'</b></span>'+
+        '<button class="btn sm gh" data-act="timer-toggle">'+(state.sess.manualPause?'▶ 继续':'⏸ 暂停')+'</button>'+
+        '<span class="spacer"></span>'+
+        '<span id="sens"></span>'+
+        '<button class="btn sm gh" data-act="check-sens">敏感词自查</button>'+
+        '<button class="btn sm pri" data-act="save-now">保存 Ctrl+S</button>'+
+      '</div>'+
+    '</div></div>'+
+    '<div class="immbar">'+
+      '<span class="tm" id="sType2">'+fmtDur(state.sess.typeSec)+'</span>'+
+      '<span style="color:#7fb0a2">/</span>'+
+      '<span class="tm" id="sWrite2">'+fmtDur(state.sess.writeSec)+'</span>'+
+      '<span style="color:#7fb0a2">|</span>'+
+      '<span class="tm" id="sWords2">'+num(wc(c?c.content:''))+'</span>'+
+      '<button class="btn sm gh" data-act="imm-side">'+(state.immSide?'隐藏大纲':'显示大纲')+'</button>'+
+      '<button class="btn sm gh" data-act="save-now">保存</button>'+
+      '<button class="btn sm" data-act="toggle-imm">退出沉浸 ⛶</button>'+
+    '</div>';
+  return '<h1 class="h1">章节写作</h1><div class="sub">左边细纲与设定速查，右边写正文。自动保存，可放心写。</div>'+body;
+}
+function qItem(id,name,meta,desc){
+  return '<div class="qitem" data-act="q-ins" data-name="'+esc(name)+'"><b>'+esc(name)+'</b><em>'+esc(meta)+'</em>'+(desc?'<div class="qdesc">'+esc(desc)+'</div>':'')+'</div>';
+}
+function afterWrite(){
+  var w=state.work, c=curCh(w);
+  var body=$('#cBody'), title=$('#cTitle'), outline=$('#cOutline');
+  if(!body||!c) return;
+  var base=wc(c.content);
+  function onInput(){
+    var nw=wc(body.value);
+    var delta=nw-base;
+    c.content=body.value; c.words=nw; c.updatedAt=Date.now();
+    base=nw;
+    addWords(delta);   /* 今日字数完全由正文增减决定 */
+    /* 打字计时：有输入就唤醒，停手 idleSec 秒后由 ticker 自动暂停 */
+    state.sess.lastKey=Date.now(); state.sess.typeRun=true;
+    throttledPushUndo();
+    updateStats(); scheduleSave();
+  }
+  body.addEventListener('input',onInput);
+  body.addEventListener('keydown',function(e){
+    state.sess.lastKey=Date.now(); state.sess.typeRun=true;
+    /* Tab 键插入两个全角空格，而不是跳走焦点 */
+    if(e.key==='Tab'){ e.preventDefault(); insertAtCursor(body,'　　'); throttledPushUndo(); onInput(); }
+  });
+  title.addEventListener('input',function(){ c.title=title.value; scheduleSave(); });
+  outline.addEventListener('input',function(){ c.outline=outline.value; scheduleSave(); });
+  $('#cStatus').addEventListener('change',function(){ c.status=this.value; scheduleSave(); });
+  $('#cVol').addEventListener('change',function(){ c.volumeId=this.value; scheduleSave(); render(); });
+  /* 查找栏：回车找下一个，Shift+回车找上一个 */
+  var ff=$('#fFind');
+  if(ff){
+    ff.addEventListener('keydown',function(e){
+      if(e.key!=='Enter') return;
+      e.preventDefault();
+      if(e.shiftKey) findGo(-1); else findGo(1);
+    });
+    var fr=$('#fRep');
+    if(fr) fr.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); replaceOne(); } });
+  }
+  /* 首次进入写作页时压入一个撤销基线 */
+  if(!state.undo.length) pushUndo();
+}
+
+/* ---------------- 撤销 / 重做 ---------------- */
+function pushUndo(){
+  var ta=$('#cBody'); if(!ta) return;
+  var s=state.undo;
+  if(s.length && s[s.length-1].v===ta.value) return;
+  s.push({v:ta.value,p:ta.selectionStart,ch:state.sel.ch});
+  if(s.length>150) s.shift();
+  state.redo.length=0;
+}
+function throttledPushUndo(){
+  var now=Date.now();
+  if(now-state.lastUndoPush<2000) return;
+  state.lastUndoPush=now;
+  pushUndo();
+}
+function applySnap(snap){
+  var ta=$('#cBody'); if(!ta) return;
+  ta.value=snap.v;
+  var c=curCh(state.work);
+  if(c){ c.content=snap.v; c.words=wc(snap.v); c.updatedAt=Date.now(); }
+  try{ ta.focus(); ta.setSelectionRange(snap.p,snap.p); }catch(e){}
+  updateStats(); scheduleSave();
+}
+function doUndo(){
+  var ta=$('#cBody'); if(!ta||!state.undo.length) return;
+  state.redo.push({v:ta.value,p:ta.selectionStart,ch:state.sel.ch});
+  while(state.undo.length && state.undo[state.undo.length-1].v===ta.value) state.undo.pop();
+  if(!state.undo.length){ state.redo.pop(); toast('没有更多可撤销'); return; }
+  applySnap(state.undo.pop());
+}
+function doRedo(){
+  var ta=$('#cBody'); if(!ta||!state.redo.length) return;
+  var snap=state.redo.pop();
+  state.undo.push({v:ta.value,p:ta.selectionStart,ch:state.sel.ch});
+  applySnap(snap);
+}
+
+/* ---------------- 计时 ---------------- */
+function idleSec(){ var w=state.work; return (w&&w.stats&&w.stats.idleSec)||30; }
+function fmtDur(sec){
+  sec=Math.max(0,Math.round(sec||0));
+  var h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60;
+  return (h?h+':'+pad(m):pad(m))+':'+pad(s);
+}
+function tickTimer(){
+  var s=state.sess, now=Date.now();
+  if(state.view==='write'&&!s.manualPause) s.writeRun=true; else s.writeRun=false;
+  if(s.typeRun){
+    if(now-s.lastKey>idleSec()*1000) s.typeRun=false;   /* 停手超过阈值 → 打字时间自动暂停 */
+    else s.typeSec++;
+  }
+  if(s.writeRun) s.writeSec++;
+  s.pend=(s.pend||0)+1;
+  if(s.pend>=15){ flushTime(); s.pend=0; }              /* 每 15 秒静默落库 */
+  paintTimers();
+}
+function flushTime(){
+  var s=state.sess, w=state.work; if(!w) return;
+  var d=w.stats.daily[today()];
+  if(!d) d=w.stats.daily[today()]={words:0,typeSec:0,writeSec:0,minutes:0};
+  d.typeSec=(d.typeSec||0)+(s.typeSec-s.flushedType);
+  d.writeSec=(d.writeSec||0)+(s.writeSec-s.flushedWrite);
+  s.flushedType=s.typeSec; s.flushedWrite=s.writeSec;
+  quietSave();
+}
+function quietSave(){
+  if(!state.work) return;
+  state.work.updatedAt=Date.now();
+  idbPut('works',state.work).catch(function(){});
+}
+function paintTimers(){
+  var s=state.sess;
+  var a=$('#sType'), b=$('#sWrite'), c=$('#sType2'), d=$('#sWrite2'), e=$('#sWords2');
+  if(a){ a.textContent=fmtDur(s.typeSec); a.className='tm'+(s.typeRun?'':' pause'); }
+  if(b){ b.textContent=fmtDur(s.writeSec); b.className='tm'+(s.writeRun?'':' pause'); }
+  if(c) c.textContent=fmtDur(s.typeSec);
+  if(d) d.textContent=fmtDur(s.writeSec);
+  if(e){ var ta=$('#cBody'); if(ta) e.textContent=num(wc(ta.value)); }
+  var btn=document.querySelector('[data-act="timer-toggle"]');
+  if(btn) btn.textContent=s.manualPause?'▶ 继续':'⏸ 暂停';
+}
+function updateStats(){
+  var w=state.work;
+  var el=$('#sWords'); if(el) el.textContent=num(wc($('#cBody').value));
+  var t=$('#sTotal'); if(t) t.textContent=num(w.chapters.reduce(function(a,x){return a+(x.words||wc(x.content));},0));
+  var d=$('#sToday'); if(d) d.textContent=num((w.stats.daily[today()]||{}).words||0);
+  var b=$('#sBar'); if(b) b.style.width=Math.min(100,Math.round(((w.stats.daily[today()]||{}).words||0)/(w.stats.goal||2000)*100))+'%';
+  paintTimers();
+}
+
+/* ---------------- 查找 / 替换 ---------------- */
+function findOpt(){ return {cs:($('#fCase')&&$('#fCase').checked)||false}; }
+function findText(){
+  var ta=$('#cBody'); if(!ta) return null;
+  return {ta:ta, src:ta.value, key:$('#fFind')?$('#fFind').value:''};
+}
+function countMatches(src,key,cs){
+  if(!key) return 0;
+  var s=cs?src:src.toLowerCase(), k=cs?key:key.toLowerCase(), n=0, i=0;
+  while((i=s.indexOf(k,i))>=0){ n++; i+=k.length; }
+  return n;
+}
+function findGo(dir){
+  var f=findText(); if(!f||!f.key) return;
+  var o=findOpt();
+  var src=o.cs?f.src:f.src.toLowerCase(), key=o.cs?f.key:f.key.toLowerCase();
+  var start = dir>0 ? f.ta.selectionEnd : f.ta.selectionStart-1;
+  var idx=-1;
+  if(dir>0){ idx=src.indexOf(key,start); if(idx<0) idx=src.indexOf(key,0); }
+  else { idx=start<0?-1:src.lastIndexOf(key,start); if(idx<0) idx=src.lastIndexOf(key); }
+  var cnt=$('#fCnt');
+  if(idx<0){ if(cnt) cnt.textContent='无匹配'; return; }
+  f.ta.focus();
+  try{ f.ta.setSelectionRange(idx,idx+key.length); }catch(e){}
+  /* 让光标滚进视野 */
+  try{ f.ta.blur(); f.ta.focus(); }catch(e){}
+  if(cnt){
+    var before=countMatches(f.src.slice(0,idx),f.key,o.cs)+1;
+    cnt.textContent=before+' / '+countMatches(f.src,f.key,o.cs);
+  }
+}
+function replaceOne(){
+  var f=findText(); if(!f||!f.key) return;
+  var o=findOpt();
+  var sel=f.ta.value.slice(f.ta.selectionStart,f.ta.selectionEnd);
+  var hit=o.cs ? sel===f.key : sel.toLowerCase()===f.key.toLowerCase();
+  if(hit){
+    pushUndo();
+    var rep=$('#fRep')?$('#fRep').value:'';
+    var s=f.ta.selectionStart;
+    f.ta.value=f.ta.value.slice(0,s)+rep+f.ta.value.slice(f.ta.selectionEnd);
+    f.ta.selectionStart=f.ta.selectionEnd=s+rep.length;
+    var c=curCh(state.work); if(c){ c.content=f.ta.value; c.words=wc(f.ta.value); }
+    updateStats(); scheduleSave();
+  }
+  findGo(1);
+}
+function replaceAll(){
+  var f=findText(); if(!f||!f.key) return;
+  var o=findOpt();
+  var n=countMatches(f.src,f.key,o.cs);
+  if(!n){ var c2=$('#fCnt'); if(c2) c2.textContent='无匹配'; return; }
+  if(!confirm('确定替换全部 '+n+' 处？可以随后用「撤销」撤回。')) return;
+  pushUndo();
+  var out,src=f.src,key=f.key,rep=$('#fRep')?$('#fRep').value:'';
+  if(o.cs){ out=src.split(key).join(rep); }
+  else{
+    var re=new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+    out=src.replace(re,rep);
+  }
+  f.ta.value=out;
+  var c=curCh(state.work); if(c){ c.content=out; c.words=wc(out); }
+  updateStats(); scheduleSave();
+  var c1=$('#fCnt'); if(c1) c1.textContent='已替换 '+n+' 处';
+  toast('已替换 '+n+' 处');
+}
+
+/* ---------------- 排版工具 ---------------- */
+function setBodyText(txt,msg){
+  var ta=$('#cBody'); if(!ta) return;
+  pushUndo();
+  ta.value=txt;
+  var c=curCh(state.work); if(c){ c.content=txt; c.words=wc(txt); c.updatedAt=Date.now(); }
+  ta.focus(); updateStats(); scheduleSave();
+  if(msg) toast(msg);
+}
+function fmtIndent(){
+  setBodyText($('#cBody').value.split('\n').map(function(l){
+    if(!l.trim()) return '';
+    return /^[　\s]/.test(l) ? l : '　　'+l;
+  }).join('\n'),'已加首行缩进');
+}
+function fmtClean(){
+  setBodyText($('#cBody').value
+    .replace(/[ \t　]+$/gm,'')
+    .replace(/\n{3,}/g,'\n\n')
+    .replace(/^\n+/,'')
+    .replace(/[ \t]+$/gm,''),'已清理空行与行尾空格');
+}
+function fmtSpace(){
+  /* 中文与英文/数字之间补一个空格 */
+  setBodyText($('#cBody').value
+    .replace(/([\u4e00-\u9fa5])([A-Za-z0-9])/g,'$1 $2')
+    .replace(/([A-Za-z0-9])([\u4e00-\u9fa5])/g,'$1 $2'),'已处理中英空格');
+}
+function fmtPunct(){
+  var v=$('#cBody').value;
+  var full=/[，。？！；：、“”‘’（）]/.test(v), half=/[,.;:"'()]/.test(v);
+  var toHalf=full>=half;   /* 当前全角多就转半角，反之转全角 */
+  var A='，。？！；：（）、', B=',.?;:(),';
+  var out='';
+  for(var i=0;i<v.length;i++){
+    var ch=v[i], p=A.indexOf(ch), q=B.indexOf(ch);
+    if(toHalf && p>=0) out+=B[p];
+    else if(!toHalf && q>=0) out+=A[q];
+    else out+=ch;
+  }
+  setBodyText(out,toHalf?'已转为半角标点':'已转为全角标点');
+}
+function fmtAll(){
+  var v=$('#cBody').value
+    .replace(/[ \t　]+$/gm,'')
+    .replace(/\n{3,}/g,'\n\n')
+    .replace(/^\n+/,'')
+    .replace(/([\u4e00-\u9fa5])([A-Za-z0-9])/g,'$1 $2')
+    .replace(/([A-Za-z0-9])([\u4e00-\u9fa5])/g,'$1 $2')
+    .split('\n').map(function(l){ return (!l.trim()||/^[　\s]/.test(l))? l : '　　'+l; }).join('\n');
+  setBodyText(v,'已一键排版');
+}
+function insertTime(){
+  var d=new Date();
+  var s=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 '+pad(d.getHours())+':'+pad(d.getMinutes());
+  var ta=$('#cBody'); if(!ta) return;
+  pushUndo(); insertAtCursor(ta,s);
+  var c=curCh(state.work); if(c){ c.content=ta.value; c.words=wc(ta.value); }
+  updateStats(); scheduleSave();
+}
+function chapterStat(){
+  var ta=$('#cBody'); if(!ta) return;
+  var v=ta.value;
+  var words=wc(v);
+  var paras=v.split('\n').filter(function(l){return l.trim();}).length;
+  var dialogs=(v.match(/[“"][^”"\n]{2,}[”"]/g)||[]).length;
+  var marks=(v.match(/[，。！？；：,.!?;:]/g)||[]).length;
+  var mins=Math.max(1,Math.round(words/400));
+  openModal('本章统计',
+    '<table class="tb"><tbody>'+
+    '<tr><td>字符数（含标点）</td><td><b>'+num(v.length)+'</b></td></tr>'+
+    '<tr><td>计数字数（不含标点）</td><td><b>'+num(words)+'</b></td></tr>'+
+    '<tr><td>段落数</td><td><b>'+num(paras)+'</b></td></tr>'+
+    '<tr><td>句读数</td><td><b>'+num(marks)+'</b></td></tr>'+
+    '<tr><td>对话段（含引号）</td><td><b>'+num(dialogs)+'</b></td></tr>'+
+    '<tr><td>预计阅读</td><td><b>约 '+mins+' 分钟</b>（按 400 字/分钟）</td></tr>'+
+    '</tbody></table>');
+}
+
+/* ---------------- 沉浸式全屏 ---------------- */
+function toggleImm(){
+  var b=document.body;
+  if(b.classList.contains('immersive')){
+    b.classList.remove('immersive');
+    if(document.fullscreenElement&&document.exitFullscreen) document.exitFullscreen().catch(function(){});
+  }else{
+    b.classList.add('immersive');
+    var el=document.documentElement;
+    if(el.requestFullscreen){ try{ el.requestFullscreen().catch(function(){}); }catch(e){} }
+    var ta=$('#cBody'); if(ta) setTimeout(function(){ ta.focus(); },60);
+  }
+}
+document.addEventListener('fullscreenchange',function(){
+  if(!document.fullscreenElement) document.body.classList.remove('immersive');
+});
+
+/* ============================================================
+   视图：人物小记
+   ============================================================ */
+var CHAR_FIELDS=[
+  ['name','姓名','text'],['alias','别名/称号','text'],['role','定位','text'],
+  ['gender','性别','text'],['age','年龄','text'],['firstAt','首次出场','text'],
+  ['appearance','外貌','textarea'],['personality','性格','textarea'],
+  ['background','身世背景','textarea'],['goal','动机与目标','textarea'],
+  ['arc','人物弧光','textarea'],['catch','口头禅/习惯','textarea'],
+  ['tags','标签','text'],['note','备注','textarea']
+];
+function vChar(w){
+  var list=w.characters.map(function(x){
+    return '<div class="li'+(state.sel.char===x.id?' on':'')+'" data-act="sel" data-m="char" data-id="'+x.id+'">'+
+      '<span class="grow"><span class="t">'+esc(x.name||'未命名')+'</span><span class="m"> · '+esc(x.role||'')+'</span></span></div>';
+  }).join('');
+  var x=w.characters.filter(function(y){return y.id===state.sel.char;})[0];
+  var detail=x?detailCard('人物 · '+x.name,CHAR_FIELDS,x)+relEditor(w,x):emptyCard('人物小记','左侧选一个人物，或点下面的按钮新建。','new-char','+ 新建人物');
+  return head('人物小记','主角、配角、反派都要立得住：他想要什么，为什么得不到。')+masterLayout(listCard('人物 '+w.characters.length,list,'new-char','+'), detail);
+}
+function relEditor(w,x){
+  var opts=w.characters.filter(function(y){return y.id!==x.id;}).map(function(y){return '<option value="'+y.id+'">'+esc(y.name||'未命名')+'</option>';}).join('');
+  var rows=(x.relations||[]).map(function(r,i){
+    var t=w.characters.filter(function(y){return y.id===r.to;})[0];
+    return '<div class="rel"><b style="min-width:4.571rem;font-size:0.929rem">'+esc(t?t.name:'?')+'</b>'+
+      '<input class="inp" data-rel="'+i+'" value="'+esc(r.desc||'')+'" placeholder="关系：师徒 / 宿敌 / 暗恋…">'+
+      '<button class="btn sm gh" data-act="rel-del" data-i="'+i+'">✕</button></div>';
+  }).join('')||'<div class="hint">暂无关系</div>';
+  return '<div class="card"><h3>人物关系<span class="spacer"></span>'+
+    (w.characters.length>1?'<select id="relAdd" class="inp w-sm">'+opts+'</select><button class="btn sm" data-act="rel-add">添加</button>':'')+
+    '</h3>'+rows+'</div>';
+}
+
+/* ============================================================
+   视图：物品 / 世界观 / 势力 / 时间线（通用结构）
+   ============================================================ */
+var SCHEMAS={
+  item:{title:'物品 · 金手指',arr:'items',label:'物品',tip:'金手指要有代价和限制，不然故事会塌。',
+    fields:[['name','名称','text'],['type','类型','select'],['owner','持有者','text'],['firstAt','首次出场','text'],
+      ['effect','效果/能力','textarea'],['origin','来历','textarea'],['cost','代价·限制','textarea'],['note','备注','textarea']],
+    name:function(o){return o.name;},meta:function(o){return o.type;},ph:'新建物品'},
+  world:{title:'世界观',arr:'world',label:'设定',tip:'规则先定死，后面写起来才不会前后矛盾。',
+    fields:[['title','标题','text'],['category','分类','select'],['tags','标签','text'],
+      ['content','设定正文','textarea'],['note','备注','textarea']],
+    name:function(o){return o.title;},meta:function(o){return o.category;},ph:'新建设定'},
+  faction:{title:'势力 · 组织',arr:'factions',label:'势力',tip:'每个势力都要有它的利益诉求，冲突才自然。',
+    fields:[['name','名称','text'],['type','类型','text'],['leader','首领','text'],['base','据点','text'],
+      ['power','实力/规模','textarea'],['creed','宗旨/利益','textarea'],['members','核心成员','textarea'],['note','备注','textarea']],
+    name:function(o){return o.name;},meta:function(o){return o.type;},ph:'新建势力'},
+  time:{title:'时间线 · 年表',arr:'timeline',label:'事件',tip:'把大事件按时间排好，回头查时间bug很方便。',
+    fields:[['date','时间/纪年','text'],['title','事件','text'],['chapter','关联章节','text'],
+      ['desc','描述','textarea'],['people','相关人物','text'],['note','备注','textarea']],
+    name:function(o){return o.title;},meta:function(o){return o.date;},ph:'新建事件'},
+  prompt:{title:'提示词库',arr:'prompts',label:'提示词',tip:'常用的 AI 写作指令存起来，一键复制。',
+    fields:[['title','标题','text'],['category','分类','text'],['tags','标签','text'],['content','提示词内容','textarea']],
+    name:function(o){return o.title;},meta:function(o){return o.category;},ph:'新建提示词'},
+  fb:{title:'读者反馈',arr:'feedback',label:'反馈',tip:'好评记下来复用，差评看有没有真问题。',
+    fields:[['source','来源','text'],['chapter','对应章节','text'],['date','日期','text'],['mood','倾向','select'],
+      ['content','内容','textarea'],['reply','我的处理','textarea']],
+    name:function(o){return (o.source||'匿名')+' · '+(o.chapter||'');},meta:function(o){return o.mood;},ph:'新建反馈'}
+};
+function vGeneric(key){
+  var w=state.work, S=SCHEMAS[key];
+  var arr=w[S.arr];
+  var list=arr.map(function(x){
+    return '<div class="li'+(state.sel[key]===x.id?' on':'')+'" data-act="sel" data-m="'+key+'" data-id="'+x.id+'">'+
+      '<span class="grow"><span class="t">'+esc(S.name(x)||'未命名')+'</span>'+(S.meta(x)?'<span class="m"> · '+esc(S.meta(x))+'</span>':'')+'</span></div>';
+  }).join('');
+  var x=arr.filter(function(y){return y.id===state.sel[key];})[0];
+  var detail=x?detailCard(S.label+' · '+(S.name(x)||''),S.fields,x):emptyCard(S.label,'左边选一条，或新建一个。','new-'+key,'+ '+S.ph);
+  return head(S.title,S.tip)+masterLayout(listCard(S.label+' '+arr.length,list,'new-'+key,'+'),detail);
+}
+function vItem(w){ return vGeneric('item'); }
+function vWorld(w){
+  var t=state.worldTab;
+  var bar='<div class="row" style="margin-bottom:12px">'+
+    '<button class="btn sm '+(t==='item'?'pri':'')+'" data-act="wtab" data-k="item">设定条目 '+w.world.length+'</button>'+
+    '<button class="btn sm '+(t==='map'?'pri':'')+'" data-act="wtab" data-k="map">地图 '+w.maps.length+'</button>'+
+    '</div>';
+  return bar+(t==='map'? vMap(w) : vGeneric('world'));
+}
+
+/* ============================================================
+   世界观 · 地图编辑器
+   ============================================================ */
+var MAP_TYPES=[
+  {k:'都城',i:'🏰'},{k:'城市',i:'🏯'},{k:'村镇',i:'🏘'},{k:'关隘',i:'⛩'},{k:'遗迹',i:'🏛'},
+  {k:'宗门',i:'🛕'},{k:'山脉',i:'⛰'},{k:'火山',i:'🌋'},{k:'森林',i:'🌲'},{k:'沙漠',i:'🏜'},
+  {k:'河流',i:'🌊'},{k:'湖泊',i:'🏞'},{k:'海域',i:'🐋'},{k:'秘境',i:'🕳'},{k:'洞府',i:'🕯'},{k:'其他',i:'📍'}
+];
+var MAP_TOOLS=[['select','选择/移动'],['add','加地点'],['link','连线'],['del','删除']];
+function curMap(w){ return (w.maps||[]).filter(function(x){return x.id===state.sel.map;})[0]||w.maps[0]||null; }
+function markById(m,id){ return (m.marks||[]).filter(function(x){return x.id===id;})[0]||null; }
+
+function vMap(w){
+  var m=curMap(w);
+  if(!m) return head('世界观地图','地形底图可随机生成，再往上标注城池山川，路线一目了然。')+
+    '<div class="card"><div class="empty">还没有地图</div><div class="row" style="justify-content:center">'+
+    '<button class="btn pri" data-act="new-map">+ 新建地图</button></div></div>';
+
+  var list=(w.maps||[]).map(function(x){
+    return '<div class="li'+(state.sel.map===x.id?' on':'')+'" data-act="sel-map" data-id="'+x.id+'">'+
+      '<span class="grow">'+esc(x.title||'未命名地图')+'</span><span class="m">'+(x.marks||[]).length+'</span></div>';
+  }).join('');
+
+  var tools=MAP_TOOLS.map(function(t){
+    return '<button class="btn sm'+(state.mapTool===t[0]?' pri':'')+'" data-act="map-tool" data-k="'+t[0]+'">'+t[1]+'</button>';
+  }).join('');
+
+  var typeOpts=MAP_TYPES.map(function(t,i){
+    return '<option value="'+i+'"'+(state.mapType===i?' selected':'')+'>'+t.i+' '+t.k+'</option>';
+  }).join('');
+
+  var ter=m.terrain||{};
+  return head('世界观地图','地形底图可随机生成，再往上标注城池山川、连出路线。改完自动保存。')+
+  '<div class="mapwrap">'+
+    '<div class="maplist">'+listCard('地图',list,'new-map','+')+'</div>'+
+    '<div class="mapstage"><div class="pane">'+
+      '<div class="maptb">'+
+        '<span class="mkhint">工具</span>'+tools+
+        '<span class="sep"></span>'+
+        '<select class="inp w-sm" id="mapType">'+typeOpts+'</select>'+
+        '<span class="sep"></span>'+
+        '<button class="btn sm'+(m.bg==='paper'?' on':'')+'" data-act="map-bg" data-k="paper">羊皮纸</button>'+
+        '<button class="btn sm'+(m.bg==='grid'?' on':'')+'" data-act="map-bg" data-k="grid">网格</button>'+
+        '<button class="btn sm'+(m.bg==='terrain'?' on':'')+'" data-act="map-bg" data-k="terrain">地形</button>'+
+        '<button class="btn sm" data-act="map-regen">↻ 换个地形</button>'+
+        '<button class="btn sm'+(ter.island?' on':'')+'" data-act="map-toggle" data-k="island">岛屿</button>'+
+        '<button class="btn sm'+(ter.rivers?' on':'')+'" data-act="map-toggle" data-k="rivers">河流</button>'+
+        '<span class="sep"></span>'+
+        '<button class="btn sm" data-act="map-export">导出 PNG</button>'+
+      '</div>'+
+      '<div class="maptb">'+
+        '<input class="inp" id="mapTitle" value="'+esc(m.title||'')+'" placeholder="地图名称" style="width:180px">'+
+        '<span class="mkhint">共 '+(m.marks||[]).length+' 个地点 / '+(m.paths||[]).length+' 条路线</span>'+
+        '<span class="spacer"></span>'+
+        '<button class="btn sm" data-act="new-map">新建</button>'+
+        '<button class="btn sm" data-act="map-dup">复制</button>'+
+        '<button class="btn sm dg" data-act="map-del">删除地图</button>'+
+      '</div>'+
+      '<div class="canvasbox"><canvas id="mapCanvas" width="900" height="560"></canvas></div>'+
+    '</div></div>'+
+    '<div class="markside" id="markSide"><div id="markPanel">'+markPanelHtml(w,m)+'</div></div>'+
+  '</div>';
+}
+
+function markPanelHtml(w,m){
+  var mk=(m.marks||[]).filter(function(x){return x.id===state.mapSel;})[0];
+  var html;
+  if(mk){
+    var worldOpts=w.world.map(function(x){
+      return '<option value="'+x.id+'"'+(mk.refId===x.id?' selected':'')+'>'+esc(x.title||'未命名')+'</option>';
+    }).join('');
+    html='<div class="card"><h3>地点<span class="spacer"></span>'+
+      '<button class="btn sm dg" data-act="map-del-mark">删除</button></h3>'+
+      fRow('名称','name',mk.name)+
+      fRow('类型','type',mk.type,{type:'select',opts:MAP_TYPES.map(function(t){return t.k;})})+
+      '<label class="frow"><span>图标大小</span><select class="inp" data-f="size">'+
+        ['小','中','大'].map(function(s){return '<option'+(mk.size===s?' selected':'')+'>'+s+'</option>';}).join('')+
+      '</select></label>'+
+      '<label class="frow"><span>关联设定条目</span><select class="inp" data-f="refId">'+
+        '<option value="">（无）</option>'+worldOpts+'</select></label>'+
+      fRow('说明','desc',mk.desc,{type:'textarea',rows:4,ph:'这个地点有什么？谁住在这里？'})+
+      '<div class="hint">坐标 '+mk.x+', '+mk.y+' · 在画布上拖动可移动</div></div>';
+  }else{
+    html='<div class="card"><h3>地点</h3>'+
+      '<div class="mkhint">选好工具后在画布上点击：<br>'+
+      '· <b>加地点</b>：点空白处新增一个地点<br>'+
+      '· <b>选择/移动</b>：点地点选中，按住可拖动<br>'+
+      '· <b>连线</b>：依次点两个地点，连成路线<br>'+
+      '· <b>删除</b>：点地点即删除（连带删除其路线）</div></div>';
+  }
+  var paths=(m.paths||[]).map(function(p){
+    var a=markById(m,p.a), b=markById(m,p.b);
+    return '<div style="border:1px solid #dcebe6;border-radius:8px;padding:7px 9px;margin-bottom:6px">'+
+      '<div class="row" style="gap:5px">'+
+        '<span class="grow" style="font-size:0.893rem">'+esc(a?a.name:'?')+' → '+esc(b?b.name:'?')+'</span>'+
+        '<button class="btn sm gh" data-act="map-path-curve" data-id="'+p.id+'">'+(p.curve?'弧线':'直线')+'</button>'+
+        '<button class="btn sm gh" data-act="map-path-del" data-id="'+p.id+'">✕</button>'+
+      '</div>'+
+      '<input class="inp" style="margin-top:5px" data-path="'+p.id+'" value="'+esc(p.label||'')+'" placeholder="路线名（如：官道 / 漕运）">'+
+    '</div>';
+  }).join('');
+  html+='<div class="card"><h3>路线 '+(m.paths||[]).length+'</h3>'+
+    (paths||'<div class="mkhint">还没有路线。切到「连线」工具，依次点两个地点即可。</div>')+'</div>';
+  return html;
+}
+
+/* ---- 地形生成（种子伪随机 + 平滑 + 岛屿衰减 + 河流）---- */
+function mulberry32(a){
+  return function(){
+    a|=0; a=a+0x6D2B79F5|0;
+    var t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };
+}
+function buildGrid(t,W,H){
+  var rnd=mulberry32((t.seed|0)||1);
+  var gw=Math.ceil(W/8), gh=Math.ceil(H/8), g=[], i, j;
+  for(j=0;j<gh;j++){ g[j]=[]; for(i=0;i<gw;i++) g[j][i]=rnd(); }
+  for(var pass=0;pass<3;pass++){
+    var ng=[];
+    for(j=0;j<gh;j++){ ng[j]=[]; for(i=0;i<gw;i++){
+      var s=0,n=0;
+      for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){
+        var y=j+dy,x=i+dx; if(y<0||x<0||y>=gh||x>=gw) continue;
+        s+=g[y][x]; n++;
+      }
+      ng[j][i]=s/n;
+    }}
+    g=ng;
+  }
+  function norm(){ var mn=1,mx=0;
+    for(j=0;j<gh;j++)for(i=0;i<gw;i++){ if(g[j][i]<mn)mn=g[j][i]; if(g[j][i]>mx)mx=g[j][i]; }
+    if(mx-mn<1e-6) mx=mn+1;
+    for(j=0;j<gh;j++)for(i=0;i<gw;i++) g[j][i]=(g[j][i]-mn)/(mx-mn);
+  }
+  norm();
+  if(t.island){
+    for(j=0;j<gh;j++)for(i=0;i<gw;i++){
+      var nx=(i/(gw-1))*2-1, ny=(j/(gh-1))*2-1;
+      var d=Math.min(1,Math.sqrt(nx*nx*1.15+ny*ny));
+      g[j][i]=g[j][i]-Math.pow(d,2.2)*1.08;
+    }
+    norm();
+  }
+  return {g:g,gw:gw,gh:gh};
+}
+function terrainColor(v){
+  if(v<0.30) return '#a9c7d8';
+  if(v<0.38) return '#bcd6e0';
+  if(v<0.43) return '#e3dcc2';
+  if(v<0.52) return '#cfd9ae';
+  if(v<0.62) return '#bccf9a';
+  if(v<0.71) return '#a5bd83';
+  if(v<0.80) return '#8fa470';
+  if(v<0.88) return '#6b8b82';
+  return '#e6f5ef';
+}
+function drawRivers(ctx,grid,W,H,t){
+  var rnd=mulberry32(((t.seed|0)||1)+977);
+  var gw=grid.gw, gh=grid.gh, g=grid.g;
+  var cw=W/gw, ch=H/gh;
+  ctx.lineCap='round'; ctx.strokeStyle='#7ba7bd';
+  var tries=0, made=0;
+  while(tries<300&&made<7){
+    tries++;
+    var i=Math.floor(rnd()*gw), j=Math.floor(rnd()*gh);
+    if(g[j][i]<0.70) continue;
+    var pts=[[i,j]], cur=[i,j], steps=0;
+    while(steps<240){
+      var bi=cur[0], bj=cur[1], bv=g[bj][bi], ni=bi, nj=bj;
+      for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){
+        if(!dx&&!dy) continue;
+        var y=bj+dy, x=bi+dx;
+        if(y<0||x<0||y>=gh||x>=gw) continue;
+        if(g[y][x]<bv){ bv=g[y][x]; ni=x; nj=y; }
+      }
+      if(ni===bi&&nj===bj) break;
+      cur=[ni,nj]; pts.push([ni,nj]); steps++;
+      if(g[nj][ni]<0.40) break;
+    }
+    if(pts.length<14) continue;
+    made++;
+    ctx.lineWidth=1.5+rnd()*1.3;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0]*cw+cw/2, pts[0][1]*ch+ch/2);
+    for(var k=1;k<pts.length;k++) ctx.lineTo(pts[k][0]*cw+cw/2, pts[k][1]*ch+ch/2);
+    ctx.stroke();
+  }
+}
+function drawMap(){
+  var cv=$('#mapCanvas'); if(!cv) return;
+  var w=state.work, m=curMap(w); if(!m) return;
+  var ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  if(m.bg==='terrain'){
+    var grid=buildGrid(m.terrain||{},W,H);
+    var cw=W/grid.gw, ch=H/grid.gh;
+    for(var j=0;j<grid.gh;j++) for(var i=0;i<grid.gw;i++){
+      ctx.fillStyle=terrainColor(grid.g[j][i]);
+      ctx.fillRect(Math.floor(i*cw),Math.floor(j*ch),Math.ceil(cw)+1,Math.ceil(ch)+1);
+    }
+    if((m.terrain||{}).rivers) drawRivers(ctx,grid,W,H,m.terrain);
+  }else{
+    ctx.fillStyle = m.bg==='white' ? '#ffffff' : (m.bg==='grid' ? '#ffffff' : '#fbfefd');
+    ctx.fillRect(0,0,W,H);
+  }
+  if(m.bg==='grid'||m.bg==='terrain'){
+    ctx.strokeStyle='rgba(120,105,85,.12)'; ctx.lineWidth=1;
+    for(var x=0;x<=W;x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for(var y=0;y<=H;y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  }
+  function M(id){ return markById(m,id); }
+  (m.paths||[]).forEach(function(p){
+    var a=M(p.a), b=M(p.b); if(!a||!b) return;
+    ctx.strokeStyle=p.color||'#14b8a6'; ctx.lineWidth=2.2;
+    ctx.setLineDash(p.style==='dashed'?[7,5]:[]);
+    ctx.beginPath();
+    if(p.curve){
+      var mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+      var dx=b.x-a.x, dy=b.y-a.y, len=Math.sqrt(dx*dx+dy*dy)||1;
+      ctx.moveTo(a.x,a.y); ctx.quadraticCurveTo(mx-dy/len*45, my+dx/len*45, b.x,b.y);
+    }else{ ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); }
+    ctx.stroke(); ctx.setLineDash([]);
+    if(p.label){
+      var lx=(a.x+b.x)/2, ly=(a.y+b.y)/2-7;
+      ctx.font='12px -apple-system,"PingFang SC",sans-serif'; ctx.textAlign='center';
+      ctx.lineWidth=3; ctx.strokeStyle='rgba(253,251,246,.92)'; ctx.strokeText(p.label,lx,ly);
+      ctx.fillStyle='#35544a'; ctx.fillText(p.label,lx,ly);
+    }
+  });
+  if(state.mapLink){
+    var s=M(state.mapLink);
+    if(s&&state.mapMouse){
+      ctx.strokeStyle='rgba(164,85,47,.55)'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+      ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(state.mapMouse.x,state.mapMouse.y);
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+  }
+  (m.marks||[]).forEach(function(mk){
+    var sel=state.mapSel===mk.id;
+    var fs=(mk.size==='大')?27:(mk.size==='小')?16:21;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font=fs+'px "Segoe UI Emoji","Apple Color Emoji","Segoe UI Symbol",sans-serif';
+    ctx.fillText(mk.icon||'📍', mk.x, mk.y);
+    ctx.font=(sel?'bold ':'')+'13px -apple-system,"PingFang SC",sans-serif';
+    var tw=ctx.measureText(mk.name||'').width;
+    var bx=mk.x-tw/2-4, by=mk.y+fs/2+1;
+    ctx.fillStyle='rgba(255,253,248,.88)';
+    ctx.fillRect(bx,by,tw+8,17);
+    if(sel){ ctx.strokeStyle='#14b8a6'; ctx.lineWidth=1.5; ctx.strokeRect(bx,by,tw+8,17); }
+    ctx.fillStyle=sel?'#0d9488':'#1f4a40';
+    ctx.fillText(mk.name||'', mk.x, by+12);
+  });
+}
+function hitMark(m,x,y){
+  var best=null, bd=1e9;
+  (m.marks||[]).forEach(function(mk){
+    var d=Math.sqrt((mk.x-x)*(mk.x-x)+(mk.y-y)*(mk.y-y));
+    if(d<20&&d<bd){ bd=d; best=mk; }
+  });
+  return best;
+}
+function renderMarkPanel(){
+  var w=state.work, m=curMap(w); if(!m) return;
+  var box=$('#markPanel'); if(!box) return;
+  box.innerHTML=markPanelHtml(w,m);
+  bindMarkForm();
+}
+function bindMarkForm(){
+  var box=$('#markPanel'); if(!box) return;
+  /* 这些字段属于「地点」而不是「世界观条目」，必须阻止冒泡，
+     否则会被通用的 data-f 处理器写进 w.world 条目里。 */
+  if(box._bound) return;
+  box._bound=true;
+  box.addEventListener('input',function(e){ e.stopPropagation(); handleMapField(e.target); });
+  box.addEventListener('change',function(e){ e.stopPropagation(); handleMapField(e.target); });
+}
+function handleMapField(el){
+  if(!el) return;
+  var w=state.work, m=curMap(w); if(!m) return;
+  var k=el.getAttribute('data-f');
+  if(k){
+    var mk=(m.marks||[]).filter(function(x){return x.id===state.mapSel;})[0];
+    if(!mk) return;
+    mk[k]=el.value;
+    var t=MAP_TYPES.filter(function(x){return x.k===mk.type;})[0];
+    if(t) mk.icon=t.i;
+    scheduleSave(); drawMap(); return;
+  }
+  var pid=el.getAttribute('data-path');
+  if(pid){
+    var p=(m.paths||[]).filter(function(x){return x.id===pid;})[0];
+    if(p){ p.label=el.value; scheduleSave(); drawMap(); }
+  }
+}
+function afterMap(){
+  var cv=$('#mapCanvas'); if(!cv) return;
+  var w=state.work;
+  drawMap();
+  bindMarkForm();
+  var mt=$('#mapTitle');
+  if(mt) mt.addEventListener('input',function(){
+    var m=curMap(w); if(!m) return;
+    m.title=this.value; scheduleSave();
+    var li=document.querySelector('#view .li.on .grow');
+    if(li) li.textContent=this.value||'未命名地图';
+  });
+  var ty=$('#mapType');
+  if(ty) ty.addEventListener('change',function(){ state.mapType=parseInt(this.value,10)||0; });
+
+  function pos(e){
+    var r=cv.getBoundingClientRect();
+    return {x:(e.clientX-r.left)*(cv.width/r.width), y:(e.clientY-r.top)*(cv.height/r.height)};
+  }
+  cv.addEventListener('mousedown',function(e){
+    var m=curMap(w); if(!m) return;
+    var p=pos(e), mk=hitMark(m,p.x,p.y), tool=state.mapTool;
+    state.mapMoved=false;
+    if(tool==='add'){
+      if(mk){ state.mapSel=mk.id; renderMarkPanel(); drawMap(); return; }
+      var t=MAP_TYPES[state.mapType]||MAP_TYPES[0];
+      var nm={id:uid(),x:Math.round(p.x),y:Math.round(p.y),name:'新地点',type:t.k,icon:t.i,desc:'',refId:'',size:'中'};
+      m.marks=m.marks||[]; m.marks.push(nm);
+      state.mapSel=nm.id; state.mapLink=null;
+      scheduleSave(); render(); return;
+    }
+    if(!mk){ if(tool==='select'&&state.mapSel){ state.mapSel=null; render(); } return; }
+    if(tool==='del'){
+      m.marks=m.marks.filter(function(x){return x.id!==mk.id;});
+      m.paths=(m.paths||[]).filter(function(p2){return p2.a!==mk.id&&p2.b!==mk.id;});
+      if(state.mapSel===mk.id) state.mapSel=null;
+      scheduleSave(); render(); return;
+    }
+    if(tool==='link'){
+      if(!state.mapLink){ state.mapLink=mk.id; drawMap(); return; }
+      if(state.mapLink===mk.id){ state.mapLink=null; drawMap(); return; }
+      m.paths=m.paths||[];
+      var from=state.mapLink;
+      var dup=m.paths.some(function(p2){ return (p2.a===from&&p2.b===mk.id)||(p2.b===from&&p2.a===mk.id); });
+      if(!dup) m.paths.push({id:uid(),a:from,b:mk.id,label:'',curve:false,style:'solid'});
+      state.mapLink=null; scheduleSave(); render(); return;
+    }
+    state.mapSel=mk.id; state.mapDrag=mk; renderMarkPanel(); drawMap();
+  });
+  cv.addEventListener('mousemove',function(e){
+    var p=pos(e);
+    if(state.mapDrag){
+      state.mapDrag.x=Math.round(p.x); state.mapDrag.y=Math.round(p.y);
+      state.mapMoved=true; drawMap(); return;
+    }
+    if(state.mapTool==='link'&&state.mapLink){ state.mapMouse=p; drawMap(); }
+  });
+  if(!state._mapUp){
+    state._mapUp=true;
+    window.addEventListener('mouseup',function(){
+      if(state.mapDrag){ state.mapDrag=null; if(state.mapMoved){ scheduleSave(); state.mapMoved=false; } }
+    });
+  }
+}
+function exportMapPNG(){
+  var cv=$('#mapCanvas'); if(!cv) return;
+  var m=curMap(state.work);
+  try{
+    var url=cv.toDataURL('image/png');
+    var a=document.createElement('a');
+    a.href=url; a.download=(m&&m.title||'地图')+'.png';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ a.remove(); },300);
+    toast('已导出 PNG');
+  }catch(err){ alert('导出失败：'+err.message); }
+}
+function vFaction(w){ return vGeneric('faction'); }
+function vTime(w){ return vGeneric('time'); }
+function vPrompt(w){ return vGeneric('prompt'); }
+function vFb(w){ return vGeneric('fb'); }
+
+function head(t,s){ return '<h1 class="h1">'+t+'</h1><div class="sub">'+s+'</div>'; }
+function listCard(title,list,newAct,btn){
+  return '<div class="card"><h3>'+esc(title)+'<span class="spacer"></span><button class="btn sm pri" data-act="'+newAct+'">'+btn+'</button></h3><div class="list">'+(list||'<div class="empty">空</div>')+'</div></div>';
+}
+function emptyCard(label,tip,newAct,btn){
+  return '<div class="card"><h3>'+esc(label)+'<span class="spacer"></span><button class="btn sm pri" data-act="'+newAct+'">'+btn+'</button></h3><div class="empty">'+tip+'</div></div>';
+}
+function detailCard(title,fields,obj){
+  var html='';
+  fields.forEach(function(f){
+    var k=f[0],label=f[1],t=f[2];
+    if(t==='select'){
+      var opts=[];
+      if(k==='type'&&SCHEMAS.item.fields===fields) opts=ITEM_TYPES;
+      else if(k==='category') opts=WORLD_CATS;
+      else if(k==='mood') opts=['好评','建议','争议','差评'];
+      html+=fRow(label,k,obj[k],{type:'select',opts:opts});
+    }else if(t==='textarea'){
+      html+=fRow(label,k,obj[k],{type:'textarea',rows:3});
+    }else{
+      html+=fRow(label,k,obj[k]);
+    }
+  });
+  return '<div class="card"><h3>'+esc(title)+'<span class="spacer"></span><button class="btn sm dg" data-act="del-cur">删除</button></h3>'+html+'</div>';
+}
+
+/* ============================================================
+   视图：伏笔追踪
+   ============================================================ */
+function vFs(w){
+  var rows=w.foreshadow.slice().sort(function(a,b){ return (a.status==='未回收'?0:1)-(b.status==='未回收'?0:1); }).map(function(f){
+    return '<tr><td><b>'+esc(f.title)+'</b></td>'+
+      '<td>'+esc(f.plantedChapter||'-')+'</td>'+
+      '<td>'+esc(f.payoffChapter||'-')+'</td>'+
+      '<td><span class="pill '+(f.status==='未回收'?'p-red':f.status==='已回收'?'p-done':'p-gray')+'">'+esc(f.status)+'</span></td>'+
+      '<td>'+esc(f.importance||'中')+'</td>'+
+      '<td style="text-align:right"><button class="btn sm" data-act="sel-fs" data-id="'+f.id+'">编辑</button></td></tr>';
+  }).join('');
+  var f=w.foreshadow.filter(function(y){return y.id===state.sel.fs;})[0];
+  var extra=f?('<div class="card"><h3>编辑伏笔<span class="spacer"></span><button class="btn sm dg" data-act="del-cur">删除</button></h3>'+
+    fRow('伏笔内容','title',f.title)+
+    '<div class="f2">'+fRow('埋设章节','plantedChapter',f.plantedChapter)+fRow('计划回收章节','payoffChapter',f.payoffChapter)+'</div>'+
+    '<div class="f2">'+fRow('状态','status',f.status,{type:'select',opts:FS_STATUS})+fRow('重要度','importance',f.importance||'中',{type:'select',opts:['高','中','低']})+'</div>'+
+    fRow('埋设时的说法','plantedDesc',f.plantedDesc,{type:'textarea',rows:3})+
+    fRow('回收方式','payoffDesc',f.payoffDesc,{type:'textarea',rows:3})+'</div>'):'';
+  return head('伏笔追踪','埋了就要收。长期挂着不收的伏笔，读者会当成 bug。')+
+    '<div class="card"><h3>全部伏笔<span class="spacer"></span><button class="btn sm pri" data-act="new-fs">+ 新伏笔</button></h3>'+
+    '<table class="tb"><thead><tr><th>内容</th><th>埋设</th><th>回收</th><th>状态</th><th>重要度</th><th></th></tr></thead><tbody>'+
+    (rows||'<tr><td colspan="6" class="empty">还没有伏笔</td></tr>')+'</tbody></table></div>'+extra;
+}
+
+/* ============================================================
+   视图：灵感箱
+   ============================================================ */
+function vIdea(w){
+  var list=w.ideas.map(function(x){
+    return '<div class="li'+(state.sel.idea===x.id?' on':'')+'" data-act="sel" data-m="idea" data-id="'+x.id+'">'+
+      '<span class="grow" style="white-space:normal">'+esc(x.content.slice(0,70))+(x.content.length>70?'…':'')+'</span>'+
+      (x.used?'<span class="pill p-done">已用</span>':'')+'</div>';
+  }).join('');
+  var x=w.ideas.filter(function(y){return y.id===state.sel.idea;})[0];
+  var detail=x?('<div class="card"><h3>灵感<span class="spacer"></span>'+
+      '<button class="btn sm" data-act="idea-to-fs">→ 转伏笔</button>'+
+      '<button class="btn sm dg" data-act="del-cur">删除</button></h3>'+
+      fRow('内容','content',x.content,{type:'textarea',rows:6})+
+      '<div class="f2">'+fRow('标签','tags',x.tags)+fRow('来源','source',x.source,{ph:'做梦 / 看书 / 刷视频'})+'</div>'+
+      '<label class="frow inline"><span>状态</span><select class="inp" data-f="used"><option value="">未使用</option><option value="1"'+(x.used?' selected':'')+'>已使用</option></select></label>'+
+      '<div class="hint">记录于 '+fmtTime(x.createdAt)+'</div></div>')
+    :'<div class="card"><h3>快速记一条<span class="spacer"></span><button class="btn sm pri" data-act="new-idea">+ 新建</button></h3>'+
+      '<textarea class="inp" id="ideaQuick" rows="4" placeholder="想到什么先扔进来，别打断写作节奏…"></textarea>'+
+      '<div class="row" style="margin-top:8px"><button class="btn pri" data-act="idea-quick">存进灵感箱</button></div></div>';
+  return head('灵感箱','写作时冒出来的点子，先扔进来，别打断节奏。')+
+    masterLayout(listCard('灵感 '+w.ideas.length,list,'new-idea','+'),detail);
+}
+
+/* ============================================================
+   视图：关系图谱
+   ============================================================ */
+function vGraph(w){
+  if(w.characters.length<2) return head('关系图谱','在「人物小记」里给人物加关系，这里会自动画出来。')+'<div class="card"><div class="empty">至少 2 个人物才能画图</div></div>';
+  return head('关系图谱','拖动可重排；点节点聚焦。人物关系在「人物小记」里维护。')+
+    '<div class="card"><h3>人物关系网<span class="spacer"></span>'+
+    '<button class="btn sm" data-act="graph-reset">重新布局</button></h3>'+
+    '<div class="graphbox" style="height:560px"><svg id="gsvg" width="100%" height="540" viewBox="0 0 900 540"></svg></div>'+
+    '<div class="hint">线条粗细代表关系强度（有描述的关系更粗）。</div></div>';
+}
+function afterGraph(){
+  var w=state.work, svg=$('#gsvg'); if(!svg) return;
+  var nodes=w.characters.map(function(c,i){ return {id:c.id,name:c.name||'未命名',role:c.role||'',x:0,y:0,vx:0,vy:0,i:i}; });
+  var idx={}; nodes.forEach(function(n,i){ idx[n.id]=i; });
+  var edges=[];
+  w.characters.forEach(function(c){
+    (c.relations||[]).forEach(function(r){
+      if(idx[r.to]!=null&&idx[c.id]!=null){
+        var a=Math.min(idx[c.id],idx[r.to]), b=Math.max(idx[c.id],idx[r.to]);
+        if(!edges.some(function(e){return e.a===a&&e.b===b;})) edges.push({a:a,b:b,desc:r.desc||''});
+      }
+    });
+  });
+  if(state.graphPos&&state.graphPos.length===nodes.length){ nodes.forEach(function(n,i){ n.x=state.graphPos[i].x; n.y=state.graphPos[i].y; }); }
+  else forceLayout(nodes,edges);
+  drawGraph(svg,nodes,edges);
+}
+function forceLayout(nodes,edges){
+  var W=900,H=540,n=nodes.length;
+  nodes.forEach(function(nd,i){ var a=i/n*Math.PI*2; nd.x=W/2+Math.cos(a)*180; nd.y=H/2+Math.sin(a)*150; });
+  for(var it=0;it<400;it++){
+    var k=Math.sqrt(W*H/n)*0.75, t=1-it/400*20;
+    for(var i=0;i<n;i++) for(var j=i+1;j<n;j++){
+      var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y, d=Math.sqrt(dx*dx+dy*dy)||0.01;
+      var f=k*k/d; var ux=dx/d, uy=dy/d;
+      nodes[i].vx+=ux*f*0.01; nodes[i].vy+=uy*f*0.01;
+      nodes[j].vx-=ux*f*0.01; nodes[j].vy-=uy*f*0.01;
+    }
+    edges.forEach(function(e){
+      var a=nodes[e.a],b=nodes[e.b];
+      var dx=b.x-a.x, dy=b.y-a.y, d=Math.sqrt(dx*dx+dy*dy)||0.01;
+      var f=(d-160)*0.004;
+      a.vx+=dx/d*f; a.vy+=dy/d*f; b.vx-=dx/d*f; b.vy-=dy/d*f;
+    });
+    nodes.forEach(function(nd){
+      nd.vx*=0.86; nd.vy*=0.86;
+      nd.x+=Math.max(-t,Math.min(t,nd.vx)); nd.y+=Math.max(-t,Math.min(t,nd.vy));
+      nd.x=Math.max(70,Math.min(W-70,nd.x)); nd.y=Math.max(46,Math.min(H-46,nd.y));
+    });
+  }
+  state.graphPos=nodes.map(function(nd){return {x:nd.x,y:nd.y};});
+}
+function drawGraph(svg,nodes,edges){
+  var W=900,H=540,h='';
+  edges.forEach(function(e){
+    var a=nodes[e.a],b=nodes[e.b];
+    var mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+(e.desc?'#34d399':'#c2d8d0')+'" stroke-width="'+(e.desc?2:1)+'"/>';
+    if(e.desc) h+='<text x="'+mx+'" y="'+my+'" font-size="10" fill="#6b8b82" text-anchor="middle">'+esc(e.desc.slice(0,8))+'</text>';
+  });
+  nodes.forEach(function(nd){
+    h+='<g class="gnode" data-id="'+nd.id+'" style="cursor:pointer">'+
+      '<circle cx="'+nd.x+'" cy="'+nd.y+'" r="22" fill="#fff" stroke="#14b8a6" stroke-width="2"/>'+
+      '<text x="'+nd.x+'" y="'+(nd.y+4)+'" font-size="12" font-weight="600" fill="#10322b" text-anchor="middle">'+esc(nd.name.slice(0,4))+'</text>'+
+      (nd.role?'<text x="'+nd.x+'" y="'+(nd.y+38)+'" font-size="10" fill="#6b8b82" text-anchor="middle">'+esc(nd.role.slice(0,6))+'</text>':'')+
+      '</g>';
+  });
+  svg.innerHTML='<rect width="'+W+'" height="'+H+'" fill="transparent"/>'+h;
+  $$('.gnode',svg).forEach(function(g){
+    g.addEventListener('click',function(){ state.sel.char=g.getAttribute('data-id'); state.view='char'; render(); });
+  });
+  if(svg._bound) return;
+  svg._bound=true;
+  // 拖拽（只在首次绑定一次，避免重复监听）
+  var drag=null;
+  svg.addEventListener('mousedown',function(e){
+    var g=e.target.closest('.gnode'); if(!g) return;
+    var id=g.getAttribute('data-id'); drag=nodes.filter(function(n){return n.id===id;})[0]; e.preventDefault();
+  });
+  svg.addEventListener('mousemove',function(e){
+    if(!drag) return;
+    var r=svg.getBoundingClientRect();
+    drag.x=(e.clientX-r.left)/r.width*W; drag.y=(e.clientY-r.top)/r.height*H;
+    drag.x=Math.max(40,Math.min(W-40,drag.x)); drag.y=Math.max(40,Math.min(H-40,drag.y));
+    state.graphPos=nodes.map(function(n){return {x:n.x,y:n.y};});
+    drawGraph(svg,nodes,edges);
+    drag=nodes.filter(function(n){return n.id===drag.id;})[0];
+  });
+  window.addEventListener('mouseup',function(){ drag=null; });
+}
+
+/* ============================================================
+   视图：写作统计
+   ============================================================ */
+function vStat(w){
+  var d=w.stats.daily, days=[];
+  for(var i=83;i>=0;i--){ var k=daysAgo(i); days.push({k:k,v:(d[k]||{}).words||0,m:(d[k]||{}).minutes||0}); }
+  var heat=days.map(function(x){ var l=x.v===0?0:x.v<300?1:x.v<800?2:x.v<2000?3:4;
+    return '<i data-l="'+l+'" title="'+x.k+'：'+x.v+'字"></i>'; }).join('');
+  var last30=days.slice(-30);
+  var max=Math.max.apply(null,last30.map(function(x){return x.v;}).concat([1]));
+  var bars=last30.map(function(x){ return '<div class="b'+(x.k===today()?' today':'')+'" style="height:'+Math.max(2,x.v/max*110)+'px" title="'+x.k+'：'+x.v+'字"></div>'; }).join('');
+  var total=Object.keys(d).reduce(function(a,k){return a+(d[k].words||0);},0);
+  var activeDays=Object.keys(d).filter(function(k){return (d[k].words||0)>0;}).length;
+  var chapters=w.chapters.length;
+  return head('写作统计','坚持比爆发重要。每天码一点，三个月就是一本书。')+
+  '<div class="grid g4" style="margin-bottom:14px">'+
+    kpi(num(w.chapters.reduce(function(a,c){return a+(c.words||wc(c.content));},0)),'当前总字数')+
+    kpi(num(total),'累计码字')+kpi(activeDays,'打卡天数')+kpi(chapters?Math.round(Object.keys(d).reduce(function(a,k){return a+(d[k].words||0);},0)/chapters):0,'章均字数')+
+  '</div>'+
+  '<div class="card"><h3>近 30 天字数<span class="spacer"></span><span class="hint">目标 '+num(w.stats.goal||2000)+' 字/天</span></h3>'+
+    '<div class="bars">'+bars+'</div>'+
+    '<div class="row" style="margin-top:8px;justify-content:space-between"><span class="hint">'+last30[0].k+'</span><span class="hint">'+last30[last30.length-1].k+'</span></div></div>'+
+  '<div class="card"><h3>12 周打卡热力图</h3><div class="heat">'+heat+'</div></div>'+
+
+  '<div class="card"><h3>今日时间</h3>'+
+    '<div class="grid g4">'+
+      kpi(fmtDur((d[today()]||{}).typeSec||0),'打字时长')+
+      kpi(fmtDur((d[today()]||{}).writeSec||0),'写作时长')+
+      kpi(speedToday(w),'打字速度（字/小时）')+
+      kpi(fmtDur(((d[today()]||{}).minutes||0)*60),'番茄专注')+
+    '</div>'+
+    '<div class="hint" style="margin-top:10px">打字时长只统计真正在敲键盘的时间，停手 '+idleSec()+' 秒自动暂停；'+
+    '写作时长是停留在写作页的总时间（含思考、翻设定）。速度 = 今日字数 ÷ 打字时长。</div></div>'+
+
+  '<div class="card"><h3>设置</h3><div class="row">'+
+    fRow('每日目标字数','_goal',w.stats.goal)+
+    fRow('打字暂停阈值（秒）','_idle',idleSec())+
+    '</div>'+
+    '<div class="hint">今日字数由正文编辑自动增减：写下正文即计入，删除则相应扣减；也可用番茄钟累计专注时长。</div></div>';
+}
+function speedToday(w){
+  var d=w.stats.daily[today()]||{};
+  var sec=d.typeSec||0;
+  if(sec<30) return '—';
+  return num(Math.round((d.words||0)/(sec/3600)));
+}
+
+/* ============================================================
+   视图：敏感词自查
+   ============================================================ */
+function vSens(w){
+  return head('敏感词自查','自己维护词库。写作页点「敏感词自查」可检查当前章节。')+
+  '<div class="grid g2">'+
+    '<div class="card"><h3>词库（'+w.sensitive.length+'）<span class="spacer"></span>'+
+      '<button class="btn sm pri" data-act="sens-add">+ 添加</button></h3>'+
+      '<div class="row" style="margin-bottom:8px"><input id="sensNew" class="inp" placeholder="输入要屏蔽的词，空格可分隔多个"></div>'+
+      '<div class="list">'+(w.sensitive.map(function(s,i){
+        return '<div class="li"><span class="grow">'+esc(s)+'</span><button class="btn sm gh" data-act="sens-del" data-i="'+i+'">✕</button></div>';
+      }).join('')||'<div class="empty">词库为空</div>')+'</div></div>'+
+    '<div class="card"><h3>全书自查</h3>'+
+      '<div class="hint" style="margin-bottom:8px">扫描所有章节正文，列出命中位置。</div>'+
+      '<button class="btn pri" data-act="sens-scan">开始扫描</button>'+
+      '<div id="sensResult" style="margin-top:12px"></div></div>'+
+  '</div>';
+}
+
+/* ============================================================
+   视图：备份导出
+   ============================================================ */
+function vBackup(w){
+  return head('备份 · 导出','数据只存在这台电脑的浏览器里。清缓存/换浏览器会丢，请定期导出 JSON。')+
+  '<div class="grid g2">'+
+    '<div class="card"><h3>备份与恢复</h3>'+
+      '<div class="row"><button class="btn pri" data-act="exp-json">导出 JSON（含全部作品）</button>'+
+      '<button class="btn" data-act="exp-json-one">导出当前作品</button></div>'+
+      '<div class="row" style="margin-top:8px"><button class="btn" data-act="imp-json">导入 JSON 恢复</button>'+
+      '<input type="file" id="impFile" accept=".json" hidden></div>'+
+      '<div class="hint" style="margin-top:12px">建议每周导出一次，丢进网盘或微信文件传输助手。</div></div>'+
+    '<div class="card"><h3>正文导出</h3>'+
+      '<div class="row"><button class="btn" data-act="exp-txt">导出 TXT（正文）</button>'+
+      '<button class="btn" data-act="exp-md">导出 Markdown</button></div>'+
+      '<div class="row" style="margin-top:8px"><button class="btn" data-act="exp-setting">导出设定集</button>'+
+      '<button class="btn" data-act="exp-outline">导出大纲+章纲</button></div>'+
+      '<div class="hint" style="margin-top:12px">TXT 按分卷章节顺序拼接，可直接贴到作者后台。</div></div>'+
+  '</div>'+
+  '<div class="card"><h3>存储占用</h3><div id="storeInfo" class="hint">计算中…</div>'+
+    '<div class="row" style="margin-top:10px"><button class="btn dg" data-act="wipe">清空全部数据</button></div></div>';
+}
+
+/* ============================================================
+   事件
+   ============================================================ */
+var LISTKEY={char:'characters',idea:'ideas',item:'items',world:'world',faction:'factions',time:'timeline',prompt:'prompts',fb:'feedback',fs:'foreshadow'};
+
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]'); if(!el) return;
+  var act=el.getAttribute('data-act'), w=state.work;
+  var id=el.getAttribute('data-id');
+
+  switch(act){
+    case 'nav': go(el.getAttribute('data-k')); return;
+
+    /* ---- 写作页：Word 常用功能 ---- */
+    case 'ed-undo': doUndo(); return;
+    case 'ed-redo': doRedo(); return;
+    case 'find-toggle': {
+      state.findOpen=!state.findOpen;
+      render();
+      if(state.findOpen){ var f=$('#fFind'); if(f){ f.focus(); f.select(); } }
+      return;
+    }
+    case 'f-prev': findGo(-1); return;
+    case 'f-next': findGo(1); return;
+    case 'f-rep': replaceOne(); return;
+    case 'f-repall': replaceAll(); return;
+    case 'fmt-all': fmtAll(); return;
+    case 'fmt-indent': fmtIndent(); return;
+    case 'fmt-clean': fmtClean(); return;
+    case 'fmt-space': fmtSpace(); return;
+    case 'fmt-punct': fmtPunct(); return;
+    case 'ins-time': insertTime(); return;
+    case 'ed-stat': chapterStat(); return;
+    case 'toggle-imm': toggleImm(); return;
+    case 'imm-side': state.immSide=!state.immSide; render(); return;
+    case 'timer-toggle': {
+      var s=state.sess;
+      s.manualPause=!s.manualPause;
+      s.writeRun=!s.manualPause;
+      toast(s.manualPause?'写作时间已暂停':'写作时间继续');
+      paintTimers(); return;
+    }
+
+    /* ---- 世界观地图 ---- */
+    case 'wtab': state.worldTab=el.getAttribute('data-k'); render(); return;
+    case 'sel-map': {
+      state.sel.map=id; state.mapSel=null; state.mapLink=null;
+      render(); return;
+    }
+    case 'new-map': {
+      var nm={id:uid(),title:'新地图',bg:'terrain',
+        terrain:{seed:Math.floor(Math.random()*1e9),island:true,rivers:true},
+        marks:[],paths:[]};
+      w.maps=w.maps||[]; w.maps.push(nm);
+      state.sel.map=nm.id; state.mapSel=null; state.mapLink=null;
+      scheduleSave(); render(); toast('已新建地图，点「换个地形」可换一张'); return;
+    }
+    case 'map-dup': {
+      var src=curMap(w); if(!src) return;
+      var cp=JSON.parse(JSON.stringify(src));
+      cp.id=uid(); cp.title=src.title+'（副本）';
+      (cp.marks||[]).forEach(function(mk){ mk.id=uid(); });
+      (cp.paths||[]).forEach(function(p){ p.id=uid(); });
+      w.maps.push(cp); state.sel.map=cp.id; state.mapSel=null;
+      scheduleSave(); render(); return;
+    }
+    case 'map-del': {
+      var dm=curMap(w); if(!dm) return;
+      if(!confirm('删除地图「'+(dm.title||'')+'」？此操作不可恢复，确定删除吗？')) return;
+      w.maps=w.maps.filter(function(x){return x.id!==dm.id;});
+      state.sel.map=null; state.mapSel=null;
+      scheduleSave(); render(); return;
+    }
+    case 'map-tool': {
+      state.mapTool=el.getAttribute('data-k');
+      state.mapLink=null;
+      render(); return;
+    }
+    case 'map-bg': { var cm=curMap(w); if(cm){ cm.bg=el.getAttribute('data-k'); scheduleSave(); render(); } return; }
+    case 'map-regen': {
+      var rm=curMap(w); if(!rm) return;
+      rm.bg='terrain';
+      rm.terrain={seed:Math.floor(Math.random()*1e9),island:!!(rm.terrain||{}).island,rivers:!!(rm.terrain||{}).rivers};
+      scheduleSave(); render(); return;
+    }
+    case 'map-toggle': {
+      var tm=curMap(w); if(!tm) return;
+      var k=el.getAttribute('data-k');
+      tm.terrain=tm.terrain||{seed:Math.floor(Math.random()*1e9)};
+      tm.terrain[k]=!tm.terrain[k];
+      if(tm.bg!=='terrain') tm.bg='terrain';
+      scheduleSave(); render(); return;
+    }
+    case 'map-export': exportMapPNG(); return;
+    case 'map-del-mark': {
+      var mm=curMap(w); if(!mm||!state.mapSel) return;
+      mm.marks=mm.marks.filter(function(x){return x.id!==state.mapSel;});
+      mm.paths=(mm.paths||[]).filter(function(p){return p.a!==state.mapSel&&p.b!==state.mapSel;});
+      state.mapSel=null; scheduleSave(); render(); return;
+    }
+    case 'map-path-del': {
+      var pm=curMap(w); if(!pm) return;
+      pm.paths=(pm.paths||[]).filter(function(p){return p.id!==id;});
+      scheduleSave(); render(); return;
+    }
+    case 'map-path-curve': {
+      var qm=curMap(w); if(!qm) return;
+      qm.paths=(qm.paths||[]).map(function(p){ if(p.id===id) p.curve=!p.curve; return p; });
+      scheduleSave(); render(); return;
+    }
+
+    /* ---- 作品 ---- */
+    case 'work-manage': openWorkManage(); return;
+    case 'go-backup': go('backup'); return;
+
+    /* ---- 总览 ---- */
+    case 'pomo': startPomo(); return;
+    case 'open-fs': state.sel.fs=id; go('fs'); return;
+    case 'open-ch': state.sel.ch=id; go('write'); return;
+    case 'new-chapter': newChapter(); return;
+
+    /* ---- 大纲 ---- */
+    case 'new-vol': {
+      var v={id:uid(),title:'新分卷'+(w.volumes.length+1),desc:''};
+      w.volumes.push(v); state.sel.vol=v.id; scheduleSave(); render(); return;
+    }
+    case 'sel-vol': state.sel.vol=id; render(); return;
+    case 'vol-up': { var i=+el.getAttribute('data-i'); if(i>0){ var t=w.volumes[i]; w.volumes[i]=w.volumes[i-1]; w.volumes[i-1]=t; scheduleSave(); render(); } return; }
+    case 'vol-down': { var j=+el.getAttribute('data-i'); if(j<w.volumes.length-1){ var t2=w.volumes[j]; w.volumes[j]=w.volumes[j+1]; w.volumes[j+1]=t2; scheduleSave(); render(); } return; }
+
+    /* ---- 写作 ---- */
+    case 'sel-ch': state.sel.ch=id; render(); return;
+    case 'qtab': state.tab.q=el.getAttribute('data-k'); render(); return;
+    case 'q-ins': {
+      var ta=$('#cBody'); if(ta) { insertAtCursor(ta,el.getAttribute('data-name')||''); var cc=curCh(w); if(cc){ cc.content=ta.value; cc.words=wc(ta.value); } updateStats(); scheduleSave(); }
+      return;
+    }
+    case 'prev-ch': case 'next-ch': {
+      var list=orderedChapters(w), ci=-1;
+      list.forEach(function(c,k){ if(c.id===state.sel.ch) ci=k; });
+      var ni=act==='prev-ch'?ci-1:ci+1;
+      if(ni>=0&&ni<list.length){ state.sel.ch=list[ni].id; render(); }
+      return;
+    }
+    case 'save-now': flushSave(); toast('已保存'); return;
+    case 'check-sens': checkSensCurrent(); return;
+
+    /* ---- 通用列表 ---- */
+    case 'sel': {
+      var m=el.getAttribute('data-m');
+      state.sel[m]=id;
+      render();
+      return;
+    }
+    case 'del-cur': {
+      var key=state.view, arrKey=LISTKEY[key];
+      if(!arrKey) return;
+      if(!confirm('确定删除？删除后无法恢复（可先导出备份）。')) return;
+      var arr=w[arrKey];
+      var oi=-1; arr.forEach(function(o,k){ if(o.id===state.sel[key]) oi=k; });
+      if(oi>=0) arr.splice(oi,1);
+      state.sel[key]=null;
+      // 清理人物关系中的引用
+      if(arrKey==='characters') w.characters.forEach(function(c){ c.relations=(c.relations||[]).filter(function(r){return r.to!==id;}); });
+      scheduleSave(); render(); return;
+    }
+    case 'new-char': newRec('characters',{name:'新人物',role:'配角',relations:[]},'char'); return;
+    case 'new-item': newRec('items',{name:'新物品',type:'道具'},'item'); return;
+    case 'new-world': newRec('world',{title:'新设定',category:'地理·地图'},'world'); return;
+    case 'new-faction': newRec('factions',{name:'新势力'},'faction'); return;
+    case 'new-time': newRec('timeline',{title:'新事件'},'time'); return;
+    case 'new-prompt': newRec('prompts',{title:'新提示词',category:'通用'},'prompt'); return;
+    case 'new-fb': newRec('feedback',{mood:'好评',date:today()},'fb'); return;
+    case 'new-idea': newRec('ideas',{content:'',createdAt:Date.now()},'idea'); return;
+
+    /* ---- 人物关系 ---- */
+    case 'rel-add': {
+      var sel=$('#relAdd'); if(!sel) return;
+      var c=w.characters.filter(function(y){return y.id===state.sel.char;})[0]; if(!c) return;
+      c.relations=c.relations||[];
+      if(c.relations.some(function(r){return r.to===sel.value;})) { toast('关系已存在'); return; }
+      c.relations.push({to:sel.value,desc:'',id:uid()});
+      scheduleSave(); render(); return;
+    }
+    case 'rel-del': {
+      var ri=+el.getAttribute('data-i');
+      var c2=w.characters.filter(function(y){return y.id===state.sel.char;})[0]; if(!c2) return;
+      c2.relations.splice(ri,1); scheduleSave(); render(); return;
+    }
+
+    /* ---- 伏笔 ---- */
+    case 'new-fs': {
+      var f={id:uid(),title:'新伏笔',plantedChapter:'',payoffChapter:'',status:'未回收',importance:'中',plantedDesc:'',payoffDesc:''};
+      w.foreshadow.push(f); state.sel.fs=f.id; scheduleSave(); render(); return;
+    }
+    case 'sel-fs': state.sel.fs=id; render(); return;
+
+    /* ---- 灵感 ---- */
+    case 'idea-quick': {
+      var t=$('#ideaQuick'); if(!t||!t.value.trim()) return;
+      var it={id:uid(),content:t.value.trim(),tags:'',source:'',used:'',createdAt:Date.now()};
+      w.ideas.unshift(it); state.sel.idea=it.id; scheduleSave(); render(); toast('已存进灵感箱'); return;
+    }
+    case 'idea-to-fs': {
+      var x=w.ideas.filter(function(y){return y.id===state.sel.idea;})[0]; if(!x) return;
+      var nf={id:uid(),title:x.content.slice(0,30),plantedChapter:'',payoffChapter:'',status:'未回收',importance:'中',plantedDesc:x.content,payoffDesc:''};
+      w.foreshadow.push(nf); x.used='1'; scheduleSave(); go('fs'); toast('已转为伏笔'); return;
+    }
+
+    /* ---- 图谱 ---- */
+    case 'graph-reset': state.graphPos=null; render(); return;
+
+    /* ---- 敏感词 ---- */
+    case 'sens-add': {
+      var si=$('#sensNew'); if(!si||!si.value.trim()) return;
+      si.value.trim().split(/\s+/).forEach(function(s){ if(s&&w.sensitive.indexOf(s)<0) w.sensitive.push(s); });
+      si.value=''; scheduleSave(); render(); return;
+    }
+    case 'sens-del': w.sensitive.splice(+el.getAttribute('data-i'),1); scheduleSave(); render(); return;
+    case 'sens-scan': scanAll(); return;
+
+    /* ---- 备份 ---- */
+    case 'exp-json': exportJSON(true); return;
+    case 'exp-json-one': exportJSON(false); return;
+    case 'imp-json': $('#impFile').click(); return;
+    case 'exp-txt': exportText('txt'); return;
+    case 'exp-md': exportText('md'); return;
+    case 'exp-setting': exportSettings(); return;
+    case 'exp-outline': exportOutline(); return;
+    case 'wipe': {
+      if(!confirm('会清空全部作品数据且不可恢复，确定？建议先导出备份。')) return;
+      if(!confirm('再确认一次：真的要清空吗？')) return;
+      var r=indexedDB.deleteDatabase('novelwriter');
+      r.onsuccess=function(){ location.reload(); };
+      return;
+    }
+  }
+});
+
+/* 表单双向绑定 */
+document.addEventListener('input',function(e){
+  var el=e.target.closest('[data-f]'); if(!el||!state.work) return;
+  var k=el.getAttribute('data-f'), w=state.work, obj=null;
+  if(state.view==='write') { /* 写作页单独处理 */ return; }
+  if(k==='_volTitle'){ var v=curVol(w); if(v){ v.title=el.value; scheduleSave(); } return; }
+  if(state.view==='dash'){ w[k]=el.value; scheduleSave(); if(k==='title') refreshList(); return; }
+  if(state.view==='outline'){ obj=w; }
+  else if(state.view==='stat'){
+    if(k==='_goal'){ w.stats.goal=parseInt(el.value,10)||2000; scheduleSave(); }
+    if(k==='_idle'){ w.stats.idleSec=Math.max(5,Math.min(600,parseInt(el.value,10)||30)); scheduleSave(); }
+    return;
+  }
+  else {
+    var arrKey=LISTKEY[state.view]; if(!arrKey) return;
+    obj=w[arrKey].filter(function(o){return o.id===state.sel[state.view];})[0];
+  }
+  if(!obj) return;
+  obj[k]=el.value; scheduleSave();
+});
+document.addEventListener('change',function(e){
+  var el=e.target.closest('[data-f]'); if(!el||!state.work) return;
+  var k=el.getAttribute('data-f'), w=state.work, obj=null;
+  if(state.view==='dash'){ w[k]=el.value; scheduleSave(); return; }
+  if(state.view==='outline'){ if(k==='_volTitle'){ var v=curVol(w); if(v){v.title=el.value; scheduleSave();} } else { w[k]=el.value; scheduleSave(); } return; }
+  if(state.view==='stat'){
+    if(k==='_goal'){ w.stats.goal=parseInt(el.value,10)||2000; scheduleSave(); }
+    if(k==='_idle'){ w.stats.idleSec=Math.max(5,Math.min(600,parseInt(el.value,10)||30)); scheduleSave(); }
+    return;
+  }
+  if(state.view==='write') return;
+  var arrKey=LISTKEY[state.view]; if(!arrKey) return;
+  obj=w[arrKey].filter(function(o){return o.id===state.sel[state.view];})[0];
+  if(!obj) return;
+  obj[k]=el.value; scheduleSave();
+});
+document.addEventListener('input',function(e){
+  var el=e.target.closest('[data-rel]'); if(!el||!state.work) return;
+  var i=+el.getAttribute('data-rel');
+  var c=state.work.characters.filter(function(y){return y.id===state.sel.char;})[0];
+  if(c&&c.relations&&c.relations[i]){ c.relations[i].desc=el.value; scheduleSave(); }
+});
+
+/* 键盘 */
+document.addEventListener('keydown',function(e){
+  var k=(e.key||'').toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==='s'){ e.preventDefault(); flushSave(); toast('已保存'); return; }
+  if(state.view!=='write') return;
+  if((e.ctrlKey||e.metaKey)&&k==='f'){ e.preventDefault(); state.findOpen=true; render(); var f=$('#fFind'); if(f){ f.focus(); f.select(); } return; }
+  var t=e.target, inBody=t&&t.id==='cBody';
+  if((e.ctrlKey||e.metaKey)&&k==='z'&&!e.shiftKey&&inBody){ e.preventDefault(); doUndo(); return; }
+  if((e.ctrlKey||e.metaKey)&&inBody&&(k==='y'||(k==='z'&&e.shiftKey))){ e.preventDefault(); doRedo(); return; }
+  if(e.altKey&&e.key==='Enter'){ e.preventDefault(); toggleImm(); return; }
+});
+
+/* 作品切换 */
+$('#workSel').addEventListener('change',function(){ loadWork(this.value); });
+
+/* 全局搜索 */
+$('#gsearch').addEventListener('input',function(){ state.search=this.value; });
+$('#gsearch').addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return;
+  var q=state.search.trim(); if(!q) return;
+  runSearch(q);
+});
+
+function runSearch(q){
+  var w=state.work, out=[];
+  w.chapters.forEach(function(c){ if((c.content||'').indexOf(q)>=0||(c.title||'').indexOf(q)>=0) out.push({t:'章节',n:c.title,d:snip(c.content,q),go:function(){state.sel.ch=c.id;go('write');}}); });
+  w.characters.forEach(function(o){ if(JSON.stringify(o).indexOf(q)>=0) out.push({t:'人物',n:o.name||'',d:(o.personality||o.background||'').slice(0,50),go:function(){state.sel.char=o.id;go('char');}}); });
+  w.items.forEach(function(o){ if(JSON.stringify(o).indexOf(q)>=0) out.push({t:'物品',n:o.name||'',d:(o.effect||'').slice(0,50),go:function(){state.sel.item=o.id;go('item');}}); });
+  w.world.forEach(function(o){ if(JSON.stringify(o).indexOf(q)>=0) out.push({t:'设定',n:o.title||'',d:(o.content||'').slice(0,50),go:function(){state.sel.world=o.id;go('world');}}); });
+  w.foreshadow.forEach(function(o){ if(JSON.stringify(o).indexOf(q)>=0) out.push({t:'伏笔',n:o.title||'',d:(o.plantedDesc||'').slice(0,50),go:function(){state.sel.fs=o.id;go('fs');}}); });
+  w.ideas.forEach(function(o){ if((o.content||'').indexOf(q)>=0) out.push({t:'灵感',n:o.content.slice(0,20),d:o.content.slice(0,50),go:function(){state.sel.idea=o.id;go('idea');}}); });
+  if(!out.length){ toast('没有找到「'+q+'」'); return; }
+  var body=out.slice(0,40).map(function(r,i){
+    return '<div class="li" data-sr="'+i+'"><span class="pill p-gray">'+r.t+'</span><span class="grow"><b>'+esc(r.n)+'</b><div class="hint">'+esc(r.d)+'</div></span></div>';
+  }).join('');
+  openModal('搜索结果：'+q+'（'+out.length+'）','<div class="list">'+body+'</div>','关闭',function(){
+    $$('#mBody .li').forEach(function(li,i){
+      li.addEventListener('click',function(){ closeModal(); out[+li.getAttribute('data-sr')].go(); });
+    });
+  });
+}
+function snip(s,q){
+  s=String(s||'').replace(/\s+/g,' '); var i=s.indexOf(q); if(i<0) return s.slice(0,60);
+  return (i>20?'…':'')+s.slice(Math.max(0,i-20),i+40)+'…';
+}
+
+/* ---------- 辅助动作 ---------- */
+function newRec(arrKey,seed,key){
+  var w=state.work, o=seed||{}; o.id=uid(); o.createdAt=Date.now();
+  w[arrKey].unshift(o); state.sel[key]=o.id; scheduleSave(); render();
+}
+function orderedChapters(w){
+  var out=[];
+  w.volumes.forEach(function(v){ w.chapters.filter(function(c){return c.volumeId===v.id;}).forEach(function(c){ out.push(c); }); });
+  w.chapters.forEach(function(c){ if(out.indexOf(c)<0) out.push(c); });
+  return out;
+}
+function newChapter(){
+  var w=state.work, vol=curVol(w)||w.volumes[0];
+  var n=w.chapters.filter(function(c){return c.volumeId===vol.id;}).length+1;
+  var c={id:uid(),volumeId:vol.id,title:'第'+num2cn(n)+'章',outline:'',content:'',status:'草稿',words:0,note:'',updatedAt:Date.now()};
+  w.chapters.push(c); state.sel.ch=c.id; scheduleSave(); go('write');
+}
+function num2cn(n){
+  var d='〇一二三四五六七八九',s='';
+  n=String(n);
+  for(var i=0;i<n.length;i++) s+=d[+n[i]];
+  return s.length>1?s.replace(/^一/,'')+'':s;
+}
+function checkSensCurrent(){
+  var w=state.work, c=curCh(w); if(!c) return;
+  var hits=[];
+  w.sensitive.forEach(function(s){ var n=(c.content||'').split(s).length-1; if(n>0) hits.push(s+' ×'+n); });
+  var el=$('#sens');
+  if(el) el.innerHTML=hits.length?('<span style="color:#b0402f">命中：'+esc(hits.join('、'))+'</span>'):'<span style="color:#4c7a45">✓ 未命中</span>';
+  if(!hits.length) toast('未命中敏感词');
+}
+function scanAll(){
+  var w=state.work, res=[];
+  w.chapters.forEach(function(c){
+    w.sensitive.forEach(function(s){
+      var n=(c.content||'').split(s).length-1;
+      if(n>0) res.push('<div class="li"><span class="pill p-red">'+esc(s)+' ×'+n+'</span><span class="grow">'+esc(c.title)+'</span></div>');
+    });
+  });
+  $('#sensResult').innerHTML=res.length?('<div class="list">'+res.join('')+'</div>'):'<div class="empty">全书未命中 ✓</div>';
+}
+
+/* ---------- 番茄钟 ---------- */
+function startPomo(){
+  if(state.timer){ clearInterval(state.timer); state.timer=null; toast('番茄钟已停止'); return; }
+  var left=25*60;
+  toast('番茄钟开始，25 分钟');
+  state.timer=setInterval(function(){
+    left--;
+    if(left<=0){
+      clearInterval(state.timer); state.timer=null;
+      addWords(0,25); flushSave(); if(state.view==='dash') render();
+      toast('🍅 一个番茄完成，已记 25 分钟');
+      return;
+    }
+    if(left%10===0&&state.view==='dash'){ $('#saveTip').textContent='🍅 '+Math.ceil(left/60)+' 分钟'; }
+  },1000);
+}
+
+/* ---------- 导入导出 ---------- */
+function download(name,text,mime){
+  var b=new Blob([text],{type:(mime||'text/plain')+';charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },300);
+}
+function exportJSON(all){
+  flushSave();
+  idbAll('works').then(function(list){
+    var data=all?list:[state.work];
+    download('网文备份-'+(all?'全部':'')+today()+'.json',JSON.stringify({v:1,exportedAt:new Date().toISOString(),works:data},null,2),'application/json');
+    toast('已导出');
+  });
+}
+/* 注意：#impFile 是「备份导出」页动态生成的，只能在 document 上做事件委托，
+   不能在脚本加载时直接取元素（会拿到 null 导致整个脚本抛错、页面空白）。 */
+document.addEventListener('change',function(e){
+  if(!e.target||e.target.id!=='impFile') return;
+  importFile(e);
+});
+function importFile(e){
+  var f=e.target.files[0]; if(!f) return;
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var d=JSON.parse(fr.result);
+      var list=d.works||[d];
+      var n=0;
+      var chain=Promise.resolve();
+      list.forEach(function(w){ if(w&&w.id){ n++; chain=chain.then(function(){ return idbPut('works',normalize(w)); }); } });
+      chain.then(function(){ toast('已导入 '+n+' 部作品'); return init(); }).then(function(){ render(); });
+    }catch(err){ alert('文件格式不对：'+err.message); }
+    e.target.value='';
+  };
+  fr.readAsText(f);
+}
+function exportText(fmt){
+  var w=state.work, list=orderedChapters(w), md=fmt==='md', out=[];
+  if(md) out.push('# '+w.title+'\n');
+  w.volumes.forEach(function(v){
+    var cs=list.filter(function(c){return c.volumeId===v.id;});
+    if(!cs.length) return;
+    if(md) out.push('\n## '+v.title+'\n'); else out.push('\n\n===== '+v.title+' =====\n');
+    cs.forEach(function(c){
+      out.push((md?'\n### ':'\n\n')+c.title+(md?'\n':'\n\n')+(c.content||''));
+    });
+  });
+  download(w.title+'-正文.'+fmt,out.join('\n'),md?'text/markdown':'text/plain');
+  toast('已导出');
+}
+function exportSettings(){
+  var w=state.work, out=['# '+w.title+' · 设定集\n'];
+  function sec(t){ out.push('\n\n====== '+t+' ======\n'); }
+  sec('一句话简介'); out.push(w.logline||'');
+  sec('主线大纲'); out.push(w.outline||'');
+  if(w.characters.length){ sec('人物'); w.characters.forEach(function(c){
+    out.push('\n【'+(c.name||'')+'】'+(c.role?' · '+c.role:'')+'\n'+
+      '外貌：'+(c.appearance||'')+'\n性格：'+(c.personality||'')+'\n背景：'+(c.background||'')+'\n目标：'+(c.goal||'')+'\n弧光：'+(c.arc||'')+
+      ((c.relations||[]).length?'\n关系：'+c.relations.map(function(r){ var t=w.characters.filter(function(y){return y.id===r.to;})[0]; return (t?t.name:'?')+'（'+r.desc+'）'; }).join('、'):''));
+  }); }
+  if(w.items.length){ sec('物品'); w.items.forEach(function(o){ out.push('\n【'+(o.name||'')+'】'+(o.type?' · '+o.type:'')+'\n效果：'+(o.effect||'')+'\n来历：'+(o.origin||'')+'\n代价：'+(o.cost||'')); }); }
+  if(w.world.length){ sec('世界观'); w.world.forEach(function(o){ out.push('\n【'+(o.title||'')+'】'+(o.category?' · '+o.category:'')+'\n'+(o.content||'')); }); }
+  if(w.factions.length){ sec('势力'); w.factions.forEach(function(o){ out.push('\n【'+(o.name||'')+'】\n据点：'+(o.base||'')+'\n宗旨：'+(o.creed||'')+'\n'+(o.desc||'')); }); }
+  if(w.timeline.length){ sec('时间线'); w.timeline.slice().sort(function(a,b){return String(a.date).localeCompare(String(b.date));}).forEach(function(o){ out.push('\n'+(o.date||'')+' · '+(o.title||'')+'\n'+(o.desc||'')); }); }
+  if((w.maps||[]).length){ sec('地图'); (w.maps||[]).forEach(function(m){
+    out.push('\n【'+(m.title||'未命名地图')+'】共 '+(m.marks||[]).length+' 个地点 / '+(m.paths||[]).length+' 条路线');
+    (m.marks||[]).forEach(function(mk){
+      var ref=mk.refId? w.world.filter(function(x){return x.id===mk.refId;})[0] : null;
+      out.push('\n · '+(mk.icon||'📍')+' '+(mk.name||'')+'（'+(mk.type||'')+'）坐标 '+mk.x+','+mk.y+
+        (ref?' · 关联设定：'+ref.title:'')+(mk.desc?'\n   '+mk.desc:''));
+    });
+    if((m.paths||[]).length){
+      out.push('\n 路线：');
+      (m.paths||[]).forEach(function(p){
+        var a=markById(m,p.a), b=markById(m,p.b);
+        out.push('\n   '+(a?a.name:'?')+' → '+(b?b.name:'?')+(p.label?'（'+p.label+'）':''));
+      });
+    }
+  }); }
+  download(w.title+'-设定集.txt',out.join('\n'));
+  toast('已导出');
+}
+function exportOutline(){
+  var w=state.work, list=orderedChapters(w), out=['# '+w.title+' · 大纲\n','\n【主线】\n'+(w.outline||'')+'\n'];
+  w.volumes.forEach(function(v){
+    out.push('\n\n===== '+v.title+' =====\n');
+    list.filter(function(c){return c.volumeId===v.id;}).forEach(function(c){
+      out.push('\n· '+c.title+'（'+c.status+'，'+wc(c.content)+'字）\n  章纲：'+(c.outline||'（未写）')+'\n');
+    });
+  });
+  download(w.title+'-大纲.txt',out.join('\n'));
+  toast('已导出');
+}
+
+/* ---------- 模态框 ---------- */
+function openModal(title,body,okText,after,footExtra){
+  $('#mTitle').textContent=title;
+  $('#mBody').innerHTML=body;
+  $('#mFoot').innerHTML=(footExtra||'')+'<button class="btn" data-act="modal-close">'+(okText||'关闭')+'</button>';
+  $('#modal').hidden=false;
+  if(after) after();
+}
+function closeModal(){ $('#modal').hidden=true; }
+document.addEventListener('click',function(e){
+  if(e.target.id==='modal'){ closeModal(); return; }
+  var el=e.target.closest('[data-act="modal-close"]'); if(el) closeModal();
+});
+
+/* ---------- 作品管理 ---------- */
+function openWorkManage(){
+  idbAll('works').then(function(list){
+    var body=list.map(function(w){
+      return '<div class="li"><span class="grow"><b>'+esc(w.title)+'</b><span class="m"> · '+w.chapters.length+'章 · '+num(w.chapters.reduce(function(a,c){return a+(c.words||wc(c.content));},0))+'字</span></span>'+
+        '<button class="btn sm" data-wact="rename" data-id="'+w.id+'">改名</button>'+
+        '<button class="btn sm" data-wact="dup" data-id="'+w.id+'">复制</button>'+
+        '<button class="btn sm dg" data-wact="del" data-id="'+w.id+'">删除</button></div>';
+    }).join('')||'<div class="empty">还没有作品</div>';
+    body+='<div class="row" style="margin-top:14px"><input id="newWorkName" class="inp" placeholder="新作品名，例如《xxxx》"><button class="btn pri" data-wact="create">新建作品</button></div>';
+    openModal('管理作品',body,null,function(){
+      $('#mBody').addEventListener('click',function(ev){
+        var b=ev.target.closest('[data-wact]'); if(!b) return;
+        var a=b.getAttribute('data-wact'), id=b.getAttribute('data-id');
+        if(a==='create'){
+          var n=$('#newWorkName').value.trim(); if(!n){ toast('请输入作品名'); return; }
+          var w=newWork(n); idbPut('works',w).then(function(){ closeModal(); return init(w.id); }).then(function(){ render(); toast('已创建'); });
+        }
+        if(a==='rename'){
+          var nn=prompt('新的作品名：',(list.filter(function(x){return x.id===id;})[0]||{}).title||'');
+          if(!nn) return;
+          idbGet('works',id).then(function(w){ if(!w) return; w.title=nn; return idbPut('works',w); }).then(function(){ closeModal(); openWorkManage(); return refreshList(); });
+        }
+        if(a==='dup'){
+          idbGet('works',id).then(function(w){
+            if(!w) return;
+            var c=JSON.parse(JSON.stringify(w)); c.id=uid(); c.title=w.title+'（副本）'; c.createdAt=Date.now();
+            return idbPut('works',c);
+          }).then(function(){ closeModal(); openWorkManage(); return refreshList(); });
+        }
+        if(a==='del'){
+          if(!confirm('删除这部作品？数据不可恢复，建议先导出备份。')) return;
+          if(list.length<=1){ alert('至少保留一部作品。'); return; }
+          idbDel('works',id).then(function(){ closeModal(); return init(); }).then(function(){ render(); openWorkManage(); });
+        }
+      });
+    });
+  });
+}
+function refreshList(){
+  return idbAll('works').then(function(list){
+    state.works=list.map(function(w){ return {id:w.id,title:w.title}; });
+    renderWorkSel();
+  });
+}
+
+/* ---------- 启动 ---------- */
+function loadWork(id){
+  flushSave();
+  return idbGet('works',id).then(function(w){
+    if(!w) return;
+    state.work=normalize(w);
+    state.sel={};
+    state.graphPos=null;
+    state.undo.length=0; state.redo.length=0;
+    state.mapSel=null; state.mapLink=null; state.mapDrag=null;
+    if(state.work.chapters[0]) state.sel.ch=state.work.chapters[0].id;
+    if(state.work.volumes[0]) state.sel.vol=state.work.volumes[0].id;
+    if(state.work.maps[0]) state.sel.map=state.work.maps[0].id;
+    return idbPut('meta',{k:'lastWork',v:id});
+  }).then(function(){ render(); });
+}
+function init(forceId){
+  return idbOpen().then(function(db){
+    DB=db;
+    return idbAll('works');
+  }).then(function(list){
+    if(!list.length){
+      var w=newWork('我的第一本小说');
+      return idbPut('works',w).then(function(){ return idbAll('works'); });
+    }
+    return list;
+  }).then(function(list){
+    state.works=list.map(function(w){ return {id:w.id,title:w.title}; });
+    return idbGet('meta','lastWork');
+  }).then(function(m){
+    var id=forceId||(m&&m.v)||(state.works[0]&&state.works[0].id);
+    var exists=state.works.some(function(x){return x.id===id;});
+    if(!exists) id=state.works[0].id;
+    return loadWork(id);
+  }).then(function(){
+    if(state.view==='backup') calcStore();
+  });
+}
+function calcStore(){
+  if(!navigator.storage||!navigator.storage.estimate) { $('#storeInfo').textContent='当前浏览器不支持查看存储占用。'; return; }
+  navigator.storage.estimate().then(function(e){
+    var used=JSON.stringify(state.work||{}).length;
+    $('#storeInfo').innerHTML='本作品数据约 <b>'+(used/1024).toFixed(1)+' KB</b>；浏览器本站已用 <b>'+((e.usage||0)/1048576).toFixed(2)+' MB</b> / 配额 '+((e.quota||0)/1048576).toFixed(0)+' MB。';
+  });
+}
+window.addEventListener('beforeunload',function(){ flushTime(); flushSave(); });
+
+function showFatal(e){
+  var box=document.getElementById('view');
+  if(box) box.innerHTML='<div class="card"><h3>页面没能正常启动</h3>'+
+    '<div class="hint">错误信息：<b>'+esc(e&&(e.stack||e.message)||e)+'</b></div>'+
+    '<div class="hint" style="margin-top:8px">常见原因：① 浏览器隐私/无痕模式下 IndexedDB 不可用；'+
+    '② 用 file:// 打开且浏览器限制了本地存储（换 Chrome / Edge 打开通常就好了）。</div></div>';
+  var t=document.getElementById('saveTip'); if(t) t.textContent='启动失败';
+}
+try{
+init().then(function(){
+  $('#saveTip').textContent='已就绪';
+  if(state.view==='backup') calcStore();
+  setInterval(tickTimer,1000);   /* 打字 / 写作双计时 */
+}).catch(showFatal);
+}catch(err){ showFatal(err); }
+window.addEventListener('error',function(ev){
+  if(!state.work&&ev&&ev.error) showFatal(ev.error);
+});
+
+/* 暴露给内部按钮 */
+window.__novel={get state(){return state;},render:render,go:go,calcStore:calcStore};
+})();
+</script>
+</body>
+</html>
