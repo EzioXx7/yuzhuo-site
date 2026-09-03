@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社招投递追踪器</title>
+<style>
+:root{
+  --bg:#f2faf7; --card:#ffffff; --text:#10322b; --muted:#6b8b82;
+  --border:#dcebe6; --border-strong:#c2d8d0; --primary:#14b8a6;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+/* hidden 属性的 UA 样式优先级低于类选择器（如 .overlay{display:flex}），必须强制生效 */
+[hidden]{display:none !important}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--text); font-size:14px; line-height:1.5;
+}
+.wrap{max-width:1320px;margin:0 auto;padding:26px 20px 80px}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:-.2px}
+.sub{color:var(--muted);font-size:13px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 14px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 14px;min-width:92px}
+.stat b{display:block;font-size:21px;line-height:1.25;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.is-total b{color:var(--primary)}
+
+.toolbar{
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:10px;margin-bottom:12px;position:sticky;top:0;z-index:20;
+}
+.spacer{flex:1 1 auto;min-width:8px}
+input[type=text],input[type=date],select,textarea{
+  font:inherit;font-size:13px;border:1px solid var(--border-strong);border-radius:8px;
+  padding:7px 9px;background:#fff;color:var(--text);outline:none;
+}
+input[type=text]:focus,input[type=date]:focus,select:focus,textarea:focus{border-color:var(--primary)}
+#q{min-width:210px}
+button{
+  font:inherit;font-size:13px;border:1px solid var(--border-strong);background:#fff;
+  border-radius:8px;padding:7px 12px;cursor:pointer;color:#1f4a40;white-space:nowrap;
+}
+button:hover{background:#eefaf6}
+button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+button.primary:hover{background:#0d9488}
+button.danger{color:#b91c1c;border-color:#fca5a5}
+button.danger:hover{background:#fef2f2}
+.chk{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:#1f4a40;cursor:pointer}
+.chk input{margin:0}
+
+.batchbar{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  background:#e1f7f0;border:1px solid #bde8dd;border-radius:10px;padding:9px 12px;margin-bottom:12px;
+}
+.batchbar .n{font-weight:600;color:#0d9488}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:13px 14px;display:flex;flex-direction:column;gap:9px;
+}
+.card.pick{outline:2px solid var(--primary);outline-offset:-1px}
+.ctop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.cname{font-size:15px;font-weight:600;line-height:1.35;word-break:break-word}
+.cmeta{font-size:12px;color:var(--muted);margin-top:2px}
+.badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pos{font-size:13px;color:#1f4a40}
+.pos i{color:var(--muted);font-style:normal}
+.url{font-size:13px;color:var(--primary);text-decoration:none;word-break:break-all;display:inline-block}
+.url:hover{text-decoration:underline}
+.dates{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dates b{font-weight:600;color:#1f4a40}
+.warn{font-size:12px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:7px;padding:4px 8px}
+.note{font-size:12.5px;color:#35544a;background:#f5fbf8;border-radius:7px;padding:6px 9px;white-space:pre-wrap;word-break:break-word}
+.acts{display:flex;gap:6px;flex-wrap:wrap;border-top:1px dashed var(--border);padding-top:9px;margin-top:1px}
+.acts select{padding:5px 7px;font-size:12.5px}
+.mini{font-size:12.5px;padding:5px 9px;border-radius:7px}
+.pickbox{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding-top:9px;border-top:1px dashed var(--border)}
+.pickbox input{margin:0}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted);background:var(--card);border:1px dashed var(--border-strong);border-radius:var(--radius)}
+
+.overlay{position:fixed;inset:0;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:100}
+.modal{background:#fff;border-radius:14px;width:min(480px,100%);padding:20px;max-height:90vh;overflow:auto}
+.modal h3{margin:0 0 14px;font-size:17px}
+.field{display:block;margin-bottom:11px;font-size:12.5px;color:#1f4a40}
+.field > span{display:block;margin-bottom:4px;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%}
+.field textarea{resize:vertical;font-family:inherit}
+.macts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:12px}
+.panel-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel-head h2{font-size:14px;margin:0;font-weight:600}
+.hint{font-size:12px;color:var(--muted)}
+.filelist{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.fitem{display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:9px;padding:8px 10px;background:#fbfefd;max-width:100%}
+.fitem .fbody{min-width:0}
+.fitem .fname{font-size:13px;font-weight:600;line-height:1.3}
+.fitem .fpath{font-size:11.5px;color:var(--muted);word-break:break-all;line-height:1.35;margin-top:1px}
+.fitem .fnote{font-size:11.5px;color:#7fb0a2;margin-top:2px}
+.fitem .fbtns{display:flex;gap:5px;flex-shrink:0}
+.filetip{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.7;background:#f5fbf8;border-radius:7px;padding:7px 10px}
+.filetip b{color:#35544a}
+
+.pill{display:inline-block;min-width:20px;text-align:center;font-size:12px;font-weight:600;color:#35544a;background:#e6f5ef;border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
+.panel.trash{margin-top:14px}
+.panel.trash .panel-head{cursor:pointer;user-select:none;border-radius:8px;padding:3px 5px;margin:-3px -5px}
+.panel.trash .panel-head:hover{background:#eefaf6}
+.panel.trash .panel-head h2::after{content:'▾';font-size:11px;color:var(--muted);margin-left:5px;display:inline-block;transition:transform .15s}
+.panel.trash.open .panel-head h2::after{transform:rotate(-90deg)}
+.trashlist{margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.titem{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:9px;padding:8px 10px;background:#fbfefd}
+.titem .tname{font-size:13px;font-weight:600;min-width:120px}
+.titem .tmeta{font-size:12px;color:var(--muted);flex:1;min-width:0;word-break:break-all}
+.titem .tbtns{display:flex;gap:5px;flex-shrink:0}
+
+footer{margin-top:26px;font-size:12.5px;color:var(--muted);line-height:1.8}
+footer summary{cursor:pointer;color:#1f4a40;font-size:13px}
+footer code{background:#e6f5ef;padding:1px 5px;border-radius:4px;font-size:12px}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  background:#10322b;color:#fff;font-size:13px;padding:9px 16px;border-radius:999px;z-index:200;opacity:0;
+  transition:opacity .2s;pointer-events:none;
+}
+.toast.on{opacity:1}
+@media (max-width:560px){
+  .wrap{padding:16px 12px 60px}
+  .grid{grid-template-columns:1fr}
+  #q{min-width:0;width:100%}
+  .toolbar{position:static}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>社招投递追踪器</h1>
+    <div class="sub">内置 130+ 家互联网 / 游戏 / 电竞公司社招页 · 数据只存在本机浏览器（localStorage），不上传服务器 · 换电脑或清缓存前记得「导出备份」</div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <input type="text" id="q" placeholder="搜索公司 / 岗位 / 备注">
+    <select id="fStatus"></select>
+    <select id="fCat"></select>
+    <select id="fSort">
+      <option value="updated">按最近更新</option>
+      <option value="applied">按投递日期</option>
+      <option value="name">按公司名称</option>
+      <option value="status">按状态</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="hideClosed"> 隐藏已结束</label>
+    <div class="spacer"></div>
+    <button id="btnAdd" class="primary">+ 添加公司</button>
+    <button id="btnBatch">批量管理</button>
+    <button id="btnExport">导出备份</button>
+    <button id="btnCsv">导出 CSV</button>
+    <button id="btnImport">导入</button>
+    <button id="btnPreset">补回预置公司</button>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>我的投递材料</h2>
+      <span class="hint" id="fileHint"></span>
+      <div class="spacer"></div>
+      <button class="mini" id="btnAddFile">+ 添加材料</button>
+      <button class="mini" id="btnToggleFiles">收起</button>
+    </div>
+    <div class="filelist" id="fileList"></div>
+    <div class="filetip" id="fileTip">
+      提示：材料只记录<b>本机文件路径</b>，不复制文件内容，占用极小。
+      请<b>双击本 HTML 文件</b>用浏览器打开（地址栏是 file:// 开头），这样点「打开」才能直接调起本地文件；
+      若在某些预览环境下点击无反应，用「复制路径」去资源管理器粘贴即可。
+    </div>
+  </section>
+
+  <div class="batchbar" id="batchbar" hidden>
+    <span class="n" id="pickCount">已选 0 项</span>
+    <select id="bStatus"></select>
+    <button class="mini" id="bApply">应用状态</button>
+    <button class="mini" id="bToday">标记今日投递</button>
+    <button class="mini" id="bAll">全选当前</button>
+    <button class="mini danger" id="bDel">删除选中</button>
+    <button class="mini" id="bExit">退出批量</button>
+  </div>
+
+  <div class="grid" id="list"></div>
+  <div class="empty" id="empty" hidden>没有匹配的公司。换个筛选条件，或点「+ 添加公司」手动添加。</div>
+
+  <section class="panel trash" id="trashPanel">
+    <div class="panel-head" id="trashHead">
+      <h2>不感兴趣 / 不合适</h2>
+      <span class="pill" id="trashCount">0</span>
+      <span class="hint" id="trashHint">点击展开，点页面其他地方自动收起</span>
+      <div class="spacer"></div>
+      <button class="mini" id="trashClear">清空</button>
+    </div>
+    <div class="trashlist" id="trashList" hidden></div>
+  </section>
+
+  <footer>
+    <details>
+      <summary>使用说明 / 数据备份</summary>
+      <div style="margin-top:8px">
+        · <b>状态流转</b>：未投递 → 已投递 → 有反馈 → 面试中 → Offer / 已结束，卡片上的下拉框可随时改。<br>
+        · <b>快捷记录</b>：「今日投递」一键写入当天日期；「记反馈」写入反馈日期并自动进入「有反馈」。<br>
+        · <b>无反馈提醒</b>：已投递超过 7 天仍无反馈，卡片会出现黄色提示条。<br>
+        · <b>删除 = 移入「不感兴趣 / 不合适」库</b>：点卡片「删除」不会真的丢，公司会存到页面底部的库里
+          （点标题栏展开，点页面其他地方自动收起），可随时「恢复」；确定不要了再在库里点「彻底删除」。
+          批量删除同样是移入库。<br>
+        · <b>备份</b>：点「导出备份」下载 JSON，换机器时用「导入」恢复；「导出 CSV」可用 Excel 打开。<br>
+        · <b>投递材料</b>：只记录文件的<b>本机完整路径</b>（不复制文件内容），点「打开」直接调起简历 / 项目集；「目录」打开所在文件夹，「复制路径」粘贴到招聘网站上传框。请<b>双击本 HTML 文件</b>用浏览器打开（地址栏 file:// 开头）才能跳转本地文件。<br>
+        · <b>预置网址</b>：内置 130+ 家公司官方社招页，按「游戏大厂 / 游戏中厂新锐 / 游戏小厂工作室 / 电竞·直播·社区 / 互联网大厂 / 互联网中厂 / AI / 车企 / 金融」分类。招聘站点域名会变动，失效时点卡片「编辑」改地址；少数公司只收录了官网主站，进去后找「加入我们 / 招聘」入口。<br>
+        · 存储位置：浏览器 localStorage，键名 <code>jobtrack.v1</code>。清理浏览器数据会一并清空，请定期导出。
+      </div>
+    </details>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal">
+    <h3 id="mTitle">添加公司</h3>
+    <label class="field"><span>公司名称 *</span><input type="text" id="f_name" placeholder="如：字节跳动"></label>
+    <div class="two">
+      <label class="field"><span>分类</span><select id="f_cat"></select></label>
+      <label class="field"><span>状态</span><select id="f_status"></select></label>
+    </div>
+    <label class="field"><span>意向岗位 / 部门</span><input type="text" id="f_position" placeholder="如：后端开发工程师 - 电商"></label>
+    <label class="field"><span>投递网址</span><input type="text" id="f_url" placeholder="https://..."></label>
+    <div class="two">
+      <label class="field"><span>投递日期</span><input type="date" id="f_applied"></label>
+      <label class="field"><span>反馈日期</span><input type="date" id="f_feedback"></label>
+    </div>
+    <label class="field"><span>备注</span><textarea id="f_note" rows="3" placeholder="内推人、岗位 ID、面试进度、HR 联系方式…"></textarea></label>
+    <div class="macts">
+      <button id="mCancel">取消</button>
+      <button id="mSave" class="primary">保存</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="application/json,.json" hidden>
+<input type="file" id="filePick" hidden>
+
+<div class="overlay" id="overlay2" hidden>
+  <div class="modal">
+    <h3 id="m2Title">添加材料</h3>
+    <label class="field"><span>材料名称 *</span><input type="text" id="g_name" placeholder="如：简历 · 游戏策划版"></label>
+    <label class="field"><span>本机完整路径 *</span><input type="text" id="g_path" placeholder="C:\Users\...\简历.pdf"></label>
+    <div class="two">
+      <div class="field"><span>从电脑里选（自动补全路径）</span><button id="g_pick" style="width:100%">浏览…</button></div>
+      <label class="field"><span>备注</span><input type="text" id="g_note" placeholder="版本 / 用途"></label>
+    </div>
+    <div class="macts">
+      <button id="gCancel">取消</button>
+      <button id="gSave" class="primary">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- 常量 ---------------- */
+var STORE_KEY = 'jobtrack.v1';
+var REMIND_DAYS = 7;
+var PRESET_VER = 2;
+
+/* 预置公司的改名 / 网址修正，用于旧数据平滑升级（不会动你填的状态与日期） */
+var RENAME = { '莉莉丝':'莉莉丝游戏', '完美世界':'完美世界游戏', '网易':'网易游戏' };
+var V1_FIX = { '莉莉丝':'https://job.lilith.com', '完美世界':'https://job.wanmei.com' };
+
+/* 默认投递材料：只保存本机文件路径，不复制文件内容 */
+var FILES_PRESET = [
+  { name:'简历 · 通用版', path:'C:\\Users\\HYZ\\Desktop\\简历\\何育卓-简历.docx', note:'何育卓-简历.docx' },
+  { name:'项目集', path:'C:\\Users\\HYZ\\Desktop\\简历\\何育卓-项目集.pdf', note:'何育卓-项目集.pdf' }
+];
+
+var STATUS = {
+  todo:      { label:'未投递', fg:'#35544a', bg:'#eefaf6' },
+  applied:   { label:'已投递', fg:'#0d9488', bg:'#d3f2ea' },
+  feedback:  { label:'有反馈', fg:'#b45309', bg:'#fef3c7' },
+  interview: { label:'面试中', fg:'#6d28d9', bg:'#ede9fe' },
+  offer:     { label:'Offer',  fg:'#15803d', bg:'#dcfce7' },
+  closed:    { label:'已结束', fg:'#b91c1c', bg:'#fee2e2' }
+};
+var STATUS_ORDER = ['todo','applied','feedback','interview','offer','closed'];
+var CATS = {
+  game1:'游戏 · 大厂', game2:'游戏 · 中厂 / 新锐', game3:'游戏 · 小厂 / 工作室',
+  esports:'电竞 · 直播 · 社区',
+  big:'互联网 · 一线大厂', mid:'互联网 · 中厂 / 垂类', ai:'AI · 硬科技',
+  auto:'新能源车企', fin:'金融 · 外企', other:'其他'
+};
+var CLOSED = 'closed';
+
+var PRESET = [
+  /* ---- game1 ---- */
+  ['腾讯游戏（IEG）','game1','https://hr.tencent.com/'],
+  ['网易游戏','game1','https://hr.163.com/'],
+  ['米哈游','game1','https://jobs.mihoyo.com'],
+  ['莉莉丝游戏','game1','https://lilithgames.jobs.feishu.cn/index'],
+  ['三七互娱','game1','https://zhaopin.37.com/index.php?m=Home&c=society&a=index'],
+  ['完美世界游戏','game1','https://jobs.games.wanmei.com/society.html'],
+  ['吉比特 · 雷霆游戏','game1','https://join.g-bits.com'],
+  ['巨人网络','game1','https://hr.ztgame.com/main/list.html'],
+  ['西山居','game1','https://app.mokahr.com/social-recruitment/xishanju/5744#/'],
+  ['搜狐畅游','game1','https://app.mokahr.com/social-recruitment/cyou-inc/42232#/'],
+  ['盛趣游戏','game1','https://app.mokahr.com/apply/shengqu/4077#/'],
+  ['英雄游戏','game1','https://careers.hero.com/#/'],
+  ['灵犀互娱（阿里游戏）','game1','https://talent.lingxigames.com/off-campus/position-list?lang=zh'],
+  ['朝夕光年（字节游戏）','game1','https://jobs.bytedance.com/experienced'],
+  ['沐瞳科技','game1','https://moonton.jobs.feishu.cn/index'],
+  ['中手游','game1','https://hr.cmge.com'],
+  ['游族网络','game1','https://www.yoozoo.com/jobs'],
+  ['祖龙娱乐','game1','https://app.mokahr.com/apply/zulong/25157#/jobs'],
+  ['心动网络（TapTap）','game1','https://www.xd.com/hr/job_apply/2'],
+  ['世纪华通 · 点点互动','game1','https://career.centurygames.cn/social/jobs'],
+  ['4399','game1','https://u.4399.com/hr/zhaopin'],
+  ['掌趣科技','game1','https://app.mokahr.com/social-recruitment/ourpalm/45614#/'],
+  ['创梦天地','game1','https://www.idreamsky.com'],
+  ['恺英网络','game1','https://www.kingnet.com'],
+  ['多益网络','game1','https://www.duoyi.com'],
+  ['网龙网络','game1','https://www.nd.com.cn'],
+  ['IGG','game1','https://cn-jobs.igg.com/'],
+  ['FunPlus 趣加','game1','https://www.funplus.com'],
+  /* ---- game2 ---- */
+  ['库洛游戏（鸣潮）','game2','https://kurogame.jobs.feishu.cn/index'],
+  ['叠纸游戏','game2','https://papergames.jobs.feishu.cn/social/position/list'],
+  ['鹰角网络','game2','https://jobs.hypergryph.com/#/jobs?page=1'],
+  ['散爆网络','game2','https://app.mokahr.com/apply/micateam/6175'],
+  ['深蓝互动','game2','https://app.mokahr.com/apply/blueinteractive/38433#/'],
+  ['紫龙游戏','game2','https://app.mokahr.com/apply/zlongame/6102#/jobs'],
+  ['勇仕网络','game2','https://www.ys4fun.com/recruitment'],
+  ['蛮啾网络（碧蓝航线）','game2','https://app.mokahr.com/apply/manjiu/40770'],
+  ['悠星网络','game2','https://app.mokahr.com/apply/yostar/26843'],
+  ['乐元素','game2','https://app.mokahr.com/apply/leyuansu/2358#/'],
+  ['百奥家庭互动','game2','https://app.mokahr.com/apply/aobi/25015#/'],
+  ['游卡网络','game2','https://app.mokahr.com/apply/yokagames/41939'],
+  ['青瓷游戏','game2','https://www.qingcigame.com'],
+  ['途游游戏','game2','https://www.tuyoo.com'],
+  ['冰川网络','game2','https://bingchuan1.zhiye.com/social/jobs'],
+  ['网元圣唐（烛龙）','game2','https://www.wangyuan.com'],
+  ['电魂网络','game2','https://www.dianhun.cn/jobs.aspx'],
+  ['蜗牛游戏','game2','https://www.snail.com'],
+  ['蓝港互动','game2','https://www.linekong.com'],
+  ['第七大道','game2','https://www.7road.com'],
+  ['光宇游戏','game2','https://www.gyyx.cn'],
+  ['心光流美','game2','https://www.xgjoy.com'],
+  ['望尘科技','game2','https://www.galasports.com'],
+  ['迷你创想（迷你世界）','game2','https://www.mini1.cn/careers/'],
+  ['延趣网络','game2','https://app.mokahr.com/social-recruitment/xmyanquhr/74332#/'],
+  ['乐享元游','game2','https://app.mokahr.com/social-recruitment/yyxx/118479#/'],
+  ['点触科技','game2','https://www.dianchu.com/ecruitment?listIndex=3'],
+  ['厦门真有趣','game2','https://www.xmfunny.com'],
+  ['贪玩游戏','game2','https://www.tanwan.com'],
+  ['儒意景秀','game2','https://www.ruyi.cn'],
+  /* ---- game3 ---- */
+  ['螺舟工作室','game3','https://www.luozhoustudio.com'],
+  ['汉家松鼠','game3','https://www.hanjiassoftware.com'],
+  ['云蟾游戏','game3','https://www.yunchangame.com'],
+  ['草花互动','game3','https://www.caohua.com'],
+  ['乐府互娱','game3','https://www.yuefugame.com'],
+  ['诗悦网络','game3','https://www.shiyuegame.com'],
+  ['乐狗游戏','game3','https://www.legougames.com'],
+  ['极致游戏','game3','https://www.jizhigame.com'],
+  ['多比特','game3','https://www.duobit.com'],
+  ['Recreate Games','game3','https://www.recreate.games'],
+  /* ---- esports ---- */
+  ['英雄体育 VSPO','esports','https://www.vspo.cn'],
+  ['腾竞体育（LPL）','esports','https://www.tjsports.com'],
+  ['网映文化 NEOTV','esports','https://www.neotv.cn'],
+  ['ImbaTV','esports','https://www.imbatv.cn'],
+  ['Mars 耀宇传媒','esports','https://www.mars.tv'],
+  ['香蕉计划电竞','esports','https://www.bananaesports.com'],
+  ['阿里体育 · 橙狮体育','esports','https://www.alisports.com'],
+  ['咪咕互娱','esports','https://www.migu.cn'],
+  ['斗鱼','esports','https://www.douyu.com'],
+  ['虎牙','esports','https://hr.huya.com'],
+  ['小黑盒','esports','https://www.xiaoheihe.cn'],
+  ['好游快爆','esports','https://www.3839.com'],
+  ['游民星空','esports','https://www.gamersky.com'],
+  ['3DM','esports','https://www.3dmgame.com'],
+  ['玩加电竞','esports','https://www.wanplus.com'],
+  ['网易大神','esports','https://ds.163.com'],
+  ['拳头游戏中国（Riot）','esports','https://www.riotgames.com/zh-hans/work-with-us/jobs'],
+  /* ---- big ---- */
+  ['字节跳动','big','https://jobs.bytedance.com/experienced'],
+  ['腾讯（集团）','big','https://join.qq.com'],
+  ['阿里巴巴','big','https://talent.alibaba.com'],
+  ['蚂蚁集团','big','https://talent.antgroup.com'],
+  ['美团','big','https://zhaopin.meituan.com'],
+  ['京东','big','https://zhaopin.jd.com'],
+  ['百度','big','https://talent.baidu.com'],
+  ['拼多多','big','https://careers.pddholdings.com'],
+  ['快手','big','https://job.kuaishou.com'],
+  ['小米','big','https://hr.xiaomi.com'],
+  ['华为','big','https://career.huawei.com'],
+  ['滴滴','big','https://talent.didiglobal.com'],
+  ['携程','big','https://job.ctrip.com'],
+  /* ---- mid ---- */
+  ['小红书','mid','https://job.xiaohongshu.com'],
+  ['哔哩哔哩','mid','https://job.bilibili.com'],
+  ['知乎','mid','https://join.zhihu.com'],
+  ['微博','mid','https://job.weibo.com'],
+  ['贝壳找房','mid','https://job.ke.com'],
+  ['得物','mid','https://job.dewu.com'],
+  ['SHEIN','mid','https://jobs.shein.com'],
+  ['货拉拉','mid','https://job.huolala.cn'],
+  ['菜鸟','mid','https://talent.cainiao.com'],
+  ['顺丰科技','mid','https://job.sf-express.com'],
+  ['三六零','mid','https://careers.360.cn'],
+  ['金山办公','mid','https://hr.wps.cn'],
+  ['用友网络','mid','https://job.yonyou.com'],
+  ['金蝶国际','mid','https://job.kingdee.com'],
+  /* ---- ai ---- */
+  ['商汤科技','ai','https://www.sensetime.com/cn/join-us'],
+  ['科大讯飞','ai','https://job.iflytek.com'],
+  ['大疆创新','ai','https://wehot.dji.com'],
+  ['海康威视','ai','https://job.hikvision.com'],
+  ['大华股份','ai','https://job.dahuatech.com'],
+  ['地平线','ai','https://www.horizon.ai'],
+  ['寒武纪','ai','https://www.cambricon.com'],
+  ['智谱 AI','ai','https://www.zhipuai.cn'],
+  ['月之暗面','ai','https://www.moonshot.cn'],
+  ['MiniMax','ai','https://www.minimaxi.com'],
+  ['百川智能','ai','https://www.baichuan-ai.com'],
+  ['旷视科技','ai','https://www.megvii.com'],
+  /* ---- auto ---- */
+  ['理想汽车','auto','https://careers.lixiang.com'],
+  ['蔚来','auto','https://www.nio.cn'],
+  ['小鹏汽车','auto','https://www.xiaopeng.com'],
+  ['比亚迪','auto','https://job.byd.com'],
+  ['极氪','auto','https://www.zeekrlife.com'],
+  /* ---- fin ---- */
+  ['微众银行','fin','https://www.webank.com'],
+  ['平安科技','fin','https://tech.pingan.com'],
+  ['招商银行','fin','https://hr.cmbchina.com'],
+  ['微软中国','fin','https://jobs.careers.microsoft.com'],
+  ['亚马逊中国','fin','https://www.amazon.jobs']
+];
+
+/* ---------------- 工具 ---------------- */
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
+function safeUrl(u){
+  u = String(u || '').trim();
+  if(!u) return '';
+  if(/^https?:\/\//i.test(u)) return u;
+  if(/^[\w-]+(\.[\w-]+)+(\/|$)/.test(u)) return 'https://' + u;
+  return '';
+}
+function uid(){ return 'j' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function today(){
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function daysSince(ds){
+  if(!ds) return null;
+  var t = new Date(ds + 'T00:00:00');
+  if(isNaN(t.getTime())) return null;
+  return Math.floor((Date.now() - t.getTime()) / 86400000);
+}
+function $(id){ return document.getElementById(id); }
+var toastTimer = null;
+function toast(msg){
+  var el = $('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('on'); }, 1800);
+}
+
+/* ---------------- 数据 ---------------- */
+function seed(){
+  var n = PRESET.length;
+  return PRESET.map(function(p, i){
+    return { id: uid(), name: p[0], cat: p[1], url: p[2], position:'',
+             status:'todo', appliedDate:'', feedbackDate:'', note:'',
+             updatedAt: Date.now() - (n - i) * 1000, preset: true };
+  });
+}
+function defaultFiles(){
+  return FILES_PRESET.map(function(f, i){
+    return { id: 'f' + i + Date.now().toString(36), name: f.name, path: f.path, note: f.note };
+  });
+}
+function load(){
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return { items: seed(), files: defaultFiles(), trash: [], presetVer: PRESET_VER };
+    var d = JSON.parse(raw);
+    return {
+      items: (d && Array.isArray(d.items)) ? d.items : seed(),
+      files: (d && Array.isArray(d.files)) ? d.files : defaultFiles(),
+      trash: (d && Array.isArray(d.trash)) ? d.trash : [],
+      presetVer: (d && d.presetVer) || 1
+    };
+  } catch(e) { console.warn('读取本地数据失败', e); }
+  return { items: seed(), files: defaultFiles(), trash: [], presetVer: PRESET_VER };
+}
+function save(){
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      v: 1, savedAt: Date.now(), presetVer: state.presetVer || PRESET_VER,
+      items: state.items, files: state.files, trash: state.trash
+    }));
+  } catch(e) {
+    toast('保存失败：本地存储空间不足');
+  }
+}
+
+var state = load();
+var ui = { q:'', status:'all', cat:'all', sort:'updated', hideClosed:false, batch:false, picked:{}, filesOpen:true };
+
+/* 旧数据平滑升级：只改名 / 改分类 / 修网址，不动你填的状态与日期 */
+function syncPreset(){
+  if((state.presetVer || 1) >= PRESET_VER) return;
+  var map = {};
+  PRESET.forEach(function(p){ map[p[0]] = { cat: p[1], url: p[2] }; });
+  state.items.forEach(function(it){
+    var old = it.name;
+    if(RENAME[old]) it.name = RENAME[old];
+    var m = map[it.name];
+    if(!m) return;
+    it.cat = m.cat;
+    if(V1_FIX[old] && it.url === V1_FIX[old]) it.url = m.url;
+  });
+  state.presetVer = PRESET_VER;
+  save();
+}
+syncPreset();
+
+/* ---------------- 下拉框初始化 ---------------- */
+function optsStatus(withAll, cur){
+  var h = '';
+  if(withAll) h += '<option value="all">全部状态</option>';
+  STATUS_ORDER.forEach(function(k){
+    h += '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + STATUS[k].label + '</option>';
+  });
+  return h;
+}
+function optsCat(withAll, cur){
+  var h = withAll ? '<option value="all">全部分类</option>' : '';
+  Object.keys(CATS).forEach(function(k){
+    h += '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + CATS[k] + '</option>';
+  });
+  return h;
+}
+$('fStatus').innerHTML = optsStatus(true, 'all');
+$('fCat').innerHTML    = optsCat(true, 'all');
+$('bStatus').innerHTML = optsStatus(false, 'applied');
+$('f_status').innerHTML = optsStatus(false, 'todo');
+$('f_cat').innerHTML    = optsCat(false, 'other');
+
+/* ---------------- 渲染 ---------------- */
+function visible(){
+  var q = ui.q.trim().toLowerCase();
+  var out = state.items.filter(function(it){
+    if(ui.status !== 'all' && it.status !== ui.status) return false;
+    if(ui.cat !== 'all' && it.cat !== ui.cat) return false;
+    if(ui.hideClosed && it.status === CLOSED) return false;
+    if(q){
+      var hay = (it.name + ' ' + (it.position||'') + ' ' + (it.note||'') + ' ' + (it.url||'')).toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  var rank = {}; STATUS_ORDER.forEach(function(k, i){ rank[k] = i; });
+  out.sort(function(a, b){
+    if(ui.sort === 'name')    return a.name.localeCompare(b.name, 'zh-Hans-CN');
+    if(ui.sort === 'applied') return (b.appliedDate || '').localeCompare(a.appliedDate || '');
+    if(ui.sort === 'status')  return (rank[a.status] - rank[b.status]) || (b.updatedAt - a.updatedAt);
+    return b.updatedAt - a.updatedAt;
+  });
+  return out;
+}
+
+function renderStats(){
+  var c = {}; STATUS_ORDER.forEach(function(k){ c[k] = 0; });
+  state.items.forEach(function(it){ if(c[it.status] != null) c[it.status]++; });
+  var total = state.items.length;
+  var done = c.applied + c.feedback + c.interview + c.offer + c.closed;
+  var rate = total ? Math.round(done / total * 100) : 0;
+  var html = '';
+  html += '<div class="stat is-total"><b>' + total + '</b><span>公司总数</span></div>';
+  html += '<div class="stat"><b>' + rate + '%</b><span>已投递占比</span></div>';
+  STATUS_ORDER.forEach(function(k){
+    var s = STATUS[k];
+    html += '<div class="stat"><b style="color:' + s.fg + '">' + c[k] + '</b><span>' + s.label + '</span></div>';
+  });
+  $('stats').innerHTML = html;
+}
+
+function cardHtml(it){
+  var s = STATUS[it.status] || STATUS.todo;
+  var u = safeUrl(it.url);
+  var h = '';
+  h += '<div class="card' + (ui.picked[it.id] ? ' pick' : '') + '" data-id="' + it.id + '">';
+  h += '<div class="ctop"><div><div class="cname">' + esc(it.name) + '</div>';
+  h += '<div class="cmeta">' + esc(CATS[it.cat] || '其他') + '</div></div>';
+  h += '<span class="badge" style="color:' + s.fg + ';background:' + s.bg + '">' + s.label + '</span></div>';
+
+  if(it.position) h += '<div class="pos"><i>岗位：</i>' + esc(it.position) + '</div>';
+
+  if(u) h += '<a class="url" href="' + esc(u) + '" target="_blank" rel="noopener">打开投递页 ↗</a>';
+  else  h += '<div class="dates">未填写投递网址</div>';
+
+  if(it.appliedDate || it.feedbackDate){
+    h += '<div class="dates">';
+    if(it.appliedDate)  h += '投递 <b>' + esc(it.appliedDate) + '</b>';
+    if(it.feedbackDate) h += ' · 反馈 <b>' + esc(it.feedbackDate) + '</b>';
+    h += '</div>';
+  }
+
+  var d = daysSince(it.appliedDate);
+  if(it.status === 'applied' && d != null && !it.feedbackDate && d >= REMIND_DAYS){
+    h += '<div class="warn">已投递 ' + d + ' 天，暂无反馈，可以跟进了</div>';
+  }
+
+  if(it.note) h += '<div class="note">' + esc(it.note) + '</div>';
+
+  if(ui.batch){
+    h += '<div class="pickbox"><input type="checkbox" data-act="pick"' + (ui.picked[it.id] ? ' checked' : '') + '> 选中此项</div>';
+  } else {
+    h += '<div class="acts">';
+    h += '<select data-act="status">';
+    STATUS_ORDER.forEach(function(k){
+      h += '<option value="' + k + '"' + (k === it.status ? ' selected' : '') + '>' + STATUS[k].label + '</option>';
+    });
+    h += '</select>';
+    h += '<button class="mini" data-act="today">今日投递</button>';
+    h += '<button class="mini" data-act="fb">记反馈</button>';
+    h += '<button class="mini" data-act="edit">编辑</button>';
+    h += '<button class="mini danger" data-act="del">删除</button>';
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+/* ---------------- 本地路径工具 ---------------- */
+function normPath(p){ return String(p || '').replace(/\\/g, '/'); }
+function toFileUrl(p){
+  p = normPath(p);
+  if(!p) return '';
+  return /^[a-zA-Z]:\//.test(p) ? 'file:///' + p : (p.charAt(0) === '/' ? 'file://' + p : 'file:///' + p);
+}
+function rawDir(p){
+  p = String(p || '');
+  var i = Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\'));
+  return i > 0 ? p.slice(0, i) : '';
+}
+function sepOf(p){ return String(p || '').indexOf('\\') >= 0 ? '\\' : '/'; }
+
+function copyText(t){
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(t).then(function(){ toast('路径已复制'); }, function(){ fallbackCopy(t); });
+  } else {
+    fallbackCopy(t);
+  }
+}
+function fallbackCopy(t){
+  var ta = document.createElement('textarea');
+  ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); toast('路径已复制'); }
+  catch(e){ toast('复制失败，请手动复制'); }
+  ta.remove();
+}
+
+/* ---------------- 投递材料 ---------------- */
+function findFile(id){
+  for(var i = 0; i < state.files.length; i++){ if(state.files[i].id === id) return state.files[i]; }
+  return null;
+}
+function renderFiles(){
+  var box = $('fileList');
+  if(!state.files.length){
+    box.innerHTML = '<div class="hint">还没有材料。点「+ 添加材料」把简历 / 项目集 / 作品集的本机路径存进来，投递时一键打开。</div>';
+    $('fileHint').textContent = '';
+    return;
+  }
+  $('fileHint').textContent = '共 ' + state.files.length + ' 份';
+  box.innerHTML = state.files.map(function(f){
+    var h = '<div class="fitem" data-id="' + esc(f.id) + '"><div class="fbody">';
+    h += '<div class="fname">' + esc(f.name) + '</div>';
+    h += '<div class="fpath">' + (f.path ? esc(f.path) : '（未填路径）') + '</div>';
+    if(f.note) h += '<div class="fnote">' + esc(f.note) + '</div>';
+    h += '</div><div class="fbtns">';
+    h += '<button class="mini" data-act="fopen">打开</button>';
+    h += '<button class="mini" data-act="fdir">目录</button>';
+    h += '<button class="mini" data-act="fcopy">复制路径</button>';
+    h += '<button class="mini" data-act="fedit">编辑</button>';
+    h += '<button class="mini danger" data-act="fdel">删除</button>';
+    h += '</div></div>';
+    return h;
+  }).join('');
+}
+
+function updatePickCount(){
+  var n = Object.keys(ui.picked).filter(function(k){ return ui.picked[k]; }).length;
+  $('pickCount').textContent = '已选 ' + n + ' 项';
+}
+function render(){
+  renderStats();
+  renderFiles();
+  var list = visible();
+  $('list').innerHTML = list.map(cardHtml).join('');
+  $('empty').hidden = list.length > 0;
+  $('batchbar').hidden = !ui.batch;
+  $('fileList').hidden = !ui.filesOpen;
+  $('fileTip').hidden = !ui.filesOpen;
+  $('btnToggleFiles').textContent = ui.filesOpen ? '收起' : '展开';
+  updatePickCount();
+  renderTrash();
+}
+
+/* ---------------- 不感兴趣 / 不合适 ---------------- */
+var trashOpen = false;
+function findTrash(id){
+  for(var i = 0; i < state.trash.length; i++){ if(state.trash[i].id === id) return i; }
+  return -1;
+}
+function fmtDate(ts){
+  var d = new Date(ts || Date.now());
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function renderTrash(){
+  $('trashCount').textContent = state.trash.length;
+  $('trashHint').textContent = state.trash.length
+    ? (trashOpen ? '点页面其他地方自动收起' : '点击展开，点页面其他地方自动收起')
+    : '删除的公司会存到这里，不会真的丢';
+  if(!state.trash.length){
+    $('trashList').innerHTML = '<div class="hint">暂无记录。点卡片上的「删除」，公司会被移进这里而不是直接丢掉。</div>';
+    return;
+  }
+  $('trashList').innerHTML = state.trash.map(function(it){
+    var s = STATUS[it.status] || STATUS.todo;
+    var h = '<div class="titem" data-id="' + esc(it.id) + '">';
+    h += '<span class="tname">' + esc(it.name) + '</span>';
+    h += '<span class="tmeta">' + esc(CATS[it.cat] || '其他') + ' · ' + esc(s.label) +
+         (it.position ? ' · ' + esc(it.position) : '') + ' · 移入于 ' + fmtDate(it.archivedAt) + '</span>';
+    h += '<span class="tbtns">';
+    h += '<button class="mini" data-act="trestore">恢复</button>';
+    h += '<button class="mini danger" data-act="tremove">彻底删除</button>';
+    h += '</span></div>';
+    return h;
+  }).join('');
+}
+function setTrashOpen(open){
+  trashOpen = open;
+  $('trashPanel').classList.toggle('open', open);
+  $('trashList').hidden = !open;
+  renderTrash();
+}
+function renderAndSave(){ save(); render(); }
+
+/* ---------------- 增删改 ---------------- */
+function findItem(id){
+  for(var i = 0; i < state.items.length; i++){ if(state.items[i].id === id) return state.items[i]; }
+  return null;
+}
+function setStatus(it, st){
+  it.status = st;
+  if(st === 'todo'){ it.appliedDate = ''; }
+  it.updatedAt = Date.now();
+}
+function itemIndex(id){
+  for(var i = 0; i < state.items.length; i++){ if(state.items[i].id === id) return i; }
+  return -1;
+}
+/* 删除 = 移入「不感兴趣 / 不合适」库，不真的丢 */
+function moveToTrash(ids){
+  var n = 0;
+  ids.forEach(function(id){
+    var i = itemIndex(id);
+    if(i < 0) return;
+    var it = state.items[i];
+    it.archivedAt = Date.now();
+    state.trash.unshift(it);
+    state.items.splice(i, 1);
+    delete ui.picked[id];
+    n++;
+  });
+  if(!n) return;
+  renderAndSave();
+  toast('已移入「不感兴趣 / 不合适」' + n + ' 家');
+}
+function delItem(id){
+  var it = findItem(id);
+  if(!it) return;
+  if(!confirm('把「' + it.name + '」移入「不感兴趣 / 不合适」库？\n\n不会真的丢——可在页面底部的库里恢复；要彻底删除，进库里点「彻底删除」。')) return;
+  moveToTrash([id]);
+}
+
+/* ---------------- 弹窗 ---------------- */
+var editingId = null;
+function openModal(id){
+  editingId = id || null;
+  var it = id ? findItem(id) : null;
+  $('mTitle').textContent = it ? '编辑公司' : '添加公司';
+  $('f_name').value     = it ? it.name : '';
+  $('f_cat').value      = it ? it.cat : 'other';
+  $('f_status').value   = it ? it.status : 'todo';
+  $('f_position').value = it ? (it.position || '') : '';
+  $('f_url').value      = it ? (it.url || '') : '';
+  $('f_applied').value  = it ? (it.appliedDate || '') : '';
+  $('f_feedback').value = it ? (it.feedbackDate || '') : '';
+  $('f_note').value     = it ? (it.note || '') : '';
+  $('overlay').hidden = false;
+  $('f_name').focus();
+}
+function closeModal(){ $('overlay').hidden = true; editingId = null; }
+function saveModal(){
+  var name = $('f_name').value.trim();
+  if(!name){ alert('公司名称必填'); $('f_name').focus(); return; }
+  var data = {
+    name: name,
+    cat: $('f_cat').value,
+    status: $('f_status').value,
+    position: $('f_position').value.trim(),
+    url: safeUrl($('f_url').value) || $('f_url').value.trim(),
+    appliedDate: $('f_applied').value,
+    feedbackDate: $('f_feedback').value,
+    note: $('f_note').value.trim(),
+    updatedAt: Date.now()
+  };
+  if(editingId){
+    var it = findItem(editingId);
+    if(it){ Object.keys(data).forEach(function(k){ it[k] = data[k]; }); }
+  } else {
+    data.id = uid();
+    data.preset = false;
+    state.items.push(data);
+  }
+  closeModal();
+  renderAndSave();
+  toast('已保存');
+}
+
+/* ---------------- 导入导出 ---------------- */
+function download(filename, content, type){
+  var blob = new Blob([content], { type: type || 'application/octet-stream' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+function exportJson(){
+  download('投递追踪备份-' + today() + '.json',
+    JSON.stringify({ v:1, exportedAt: new Date().toISOString(), items: state.items, files: state.files, trash: state.trash }, null, 2),
+    'application/json');
+  toast('备份已导出（含材料路径与不感兴趣库）');
+}
+function csvCell(v){
+  v = String(v == null ? '' : v);
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function exportCsv(){
+  var head = ['公司','分类','岗位','状态','投递日期','反馈日期','网址','备注'];
+  var rows = [head.join(',')];
+  visible().forEach(function(it){
+    rows.push([
+      it.name, CATS[it.cat] || '其他', it.position || '', (STATUS[it.status] || {}).label || '',
+      it.appliedDate || '', it.feedbackDate || '', it.url || '', it.note || ''
+    ].map(csvCell).join(','));
+  });
+  download('投递追踪-' + today() + '.csv', '\ufeff' + rows.join('\r\n'), 'text/csv;charset=utf-8');
+  toast('CSV 已导出（当前筛选结果）');
+}
+function importJson(file){
+  var r = new FileReader();
+  r.onload = function(){
+    try {
+      var d = JSON.parse(r.result);
+      var arr = Array.isArray(d) ? d : d.items;
+      if(!Array.isArray(arr)) throw new Error('格式不对');
+      if(!confirm('导入 ' + arr.length + ' 条记录，将覆盖当前数据（含材料与不感兴趣库），确定继续？')) return;
+      var rawFiles = (!Array.isArray(d) && Array.isArray(d.files)) ? d.files : state.files;
+      state.files = rawFiles.map(function(f){
+        return { id: f.id || ('f' + uid()), name: String(f.name || '未命名'),
+                 path: String(f.path || ''), note: String(f.note || '') };
+      });
+      var rawTrash = (!Array.isArray(d) && Array.isArray(d.trash)) ? d.trash : [];
+      state.trash = rawTrash.map(function(it){
+        return {
+          id: it.id || uid(), name: String(it.name || '未命名'),
+          cat: CATS[it.cat] ? it.cat : 'other',
+          url: safeUrl(it.url) || '', position: String(it.position || ''),
+          status: STATUS[it.status] ? it.status : 'todo',
+          appliedDate: it.appliedDate || '', feedbackDate: it.feedbackDate || '',
+          note: String(it.note || ''), updatedAt: it.updatedAt || Date.now(),
+          archivedAt: it.archivedAt || Date.now(), preset: !!it.preset
+        };
+      });
+      state.items = arr.map(function(it){
+        return {
+          id: it.id || uid(), name: String(it.name || '未命名'),
+          cat: CATS[it.cat] ? it.cat : 'other',
+          url: safeUrl(it.url) || '', position: String(it.position || ''),
+          status: STATUS[it.status] ? it.status : 'todo',
+          appliedDate: it.appliedDate || '', feedbackDate: it.feedbackDate || '',
+          note: String(it.note || ''), updatedAt: it.updatedAt || Date.now(),
+          preset: !!it.preset
+        };
+      });
+      ui.picked = {};
+      renderAndSave();
+      toast('已导入 ' + state.items.length + ' 条');
+    } catch(e) {
+      alert('导入失败：文件不是有效的备份 JSON');
+    }
+  };
+  r.readAsText(file);
+}
+function backfillPreset(){
+  var has = {};
+  state.items.forEach(function(it){ has[it.name] = true; });
+  var add = PRESET.filter(function(p){ return !has[p[0]]; });
+  if(!add.length){ toast('预置公司都已在列表中'); return; }
+  if(!confirm('将补回 ' + add.length + ' 家预置公司，继续？')) return;
+  state.items = state.items.concat(seed().filter(function(it){ return !has[it.name]; }));
+  renderAndSave();
+  toast('已补回 ' + add.length + ' 家');
+}
+
+/* ---------------- 事件 ---------------- */
+$('q').addEventListener('input', function(e){ ui.q = e.target.value; render(); });
+$('fStatus').addEventListener('change', function(e){ ui.status = e.target.value; render(); });
+$('fCat').addEventListener('change', function(e){ ui.cat = e.target.value; render(); });
+$('fSort').addEventListener('change', function(e){ ui.sort = e.target.value; render(); });
+$('hideClosed').addEventListener('change', function(e){ ui.hideClosed = e.target.checked; render(); });
+
+$('btnAdd').addEventListener('click', function(){ openModal(null); });
+$('mCancel').addEventListener('click', closeModal);
+$('mSave').addEventListener('click', saveModal);
+$('overlay').addEventListener('click', function(e){ if(e.target === $('overlay')) closeModal(); });
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && !$('overlay').hidden) closeModal();
+  if(e.key === 'Enter' && !$('overlay').hidden && e.target.tagName !== 'TEXTAREA') saveModal();
+});
+
+$('list').addEventListener('click', function(e){
+  var el = e.target.closest('[data-act]');
+  if(!el) return;
+  var card = e.target.closest('.card');
+  if(!card) return;
+  var id = card.getAttribute('data-id');
+  var it = findItem(id);
+  if(!it) return;
+  var act = el.getAttribute('data-act');
+
+  if(act === 'pick'){
+    ui.picked[id] = el.checked;
+    card.classList.toggle('pick', el.checked);
+    updatePickCount();
+    return;
+  }
+  /* 状态下拉框：不要在 click 里重绘，否则刚弹出的原生下拉会被 innerHTML 重写销毁，导致点不开 */
+  if(act === 'status'){ return; }
+  if(act === 'today'){
+    it.appliedDate = today();
+    if(it.status === 'todo') it.status = 'applied';
+    it.updatedAt = Date.now(); renderAndSave(); toast('已记录今日投递：' + it.name); return;
+  }
+  if(act === 'fb'){
+    if(!it.appliedDate) it.appliedDate = today();
+    it.feedbackDate = today();
+    if(it.status === 'todo' || it.status === 'applied') it.status = 'feedback';
+    it.updatedAt = Date.now(); renderAndSave(); toast('已记录反馈：' + it.name); return;
+  }
+  if(act === 'edit'){ openModal(id); return; }
+  if(act === 'del'){ delItem(id); return; }
+});
+$('list').addEventListener('change', function(e){
+  var el = e.target.closest('[data-act="status"]');
+  if(!el) return;
+  var card = e.target.closest('.card');
+  var it = findItem(card.getAttribute('data-id'));
+  if(it){ setStatus(it, el.value); renderAndSave(); }
+});
+
+$('btnBatch').addEventListener('click', function(){
+  ui.batch = !ui.batch;
+  if(!ui.batch) ui.picked = {};
+  this.textContent = ui.batch ? '退出批量' : '批量管理';
+  render();
+});
+$('bExit').addEventListener('click', function(){
+  ui.batch = false; ui.picked = {};
+  $('btnBatch').textContent = '批量管理';
+  render();
+});
+$('bAll').addEventListener('click', function(){
+  visible().forEach(function(it){ ui.picked[it.id] = true; });
+  render();
+});
+function pickedIds(){ return Object.keys(ui.picked).filter(function(k){ return ui.picked[k]; }); }
+$('bApply').addEventListener('click', function(){
+  var ids = pickedIds();
+  if(!ids.length){ alert('请先勾选记录'); return; }
+  var st = $('bStatus').value;
+  ids.forEach(function(id){ var it = findItem(id); if(it) setStatus(it, st); });
+  renderAndSave();
+  toast('已更新 ' + ids.length + ' 条');
+});
+$('bToday').addEventListener('click', function(){
+  var ids = pickedIds();
+  if(!ids.length){ alert('请先勾选记录'); return; }
+  var t = today();
+  ids.forEach(function(id){
+    var it = findItem(id); if(!it) return;
+    it.appliedDate = t;
+    if(it.status === 'todo') it.status = 'applied';
+    it.updatedAt = Date.now();
+  });
+  renderAndSave();
+  toast('已标记 ' + ids.length + ' 条为今日投递');
+});
+$('bDel').addEventListener('click', function(){
+  var ids = pickedIds();
+  if(!ids.length){ alert('请先勾选记录'); return; }
+  if(!confirm('把选中的 ' + ids.length + ' 家移入「不感兴趣 / 不合适」库？\n\n可在页面底部的库里恢复。')) return;
+  moveToTrash(ids);
+});
+
+$('btnExport').addEventListener('click', exportJson);
+$('btnCsv').addEventListener('click', exportCsv);
+$('btnImport').addEventListener('click', function(){ $('fileInput').click(); });
+$('fileInput').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  if(f) importJson(f);
+  e.target.value = '';
+});
+$('btnPreset').addEventListener('click', backfillPreset);
+
+/* ---------------- 材料事件 ---------------- */
+var editingFileId = null;
+function openFileModal(id){
+  editingFileId = id || null;
+  var f = id ? findFile(id) : null;
+  $('m2Title').textContent = f ? '编辑材料' : '添加材料';
+  $('g_name').value = f ? f.name : '';
+  $('g_path').value = f ? (f.path || '') : '';
+  $('g_note').value = f ? (f.note || '') : '';
+  $('overlay2').hidden = false;
+  $('g_name').focus();
+}
+function closeFileModal(){ $('overlay2').hidden = true; editingFileId = null; }
+function saveFileModal(){
+  var name = $('g_name').value.trim();
+  var path = $('g_path').value.trim();
+  if(!name){ alert('材料名称必填'); $('g_name').focus(); return; }
+  if(!path){ alert('请填写本机完整路径'); $('g_path').focus(); return; }
+  var note = $('g_note').value.trim();
+  if(editingFileId){
+    var f = findFile(editingFileId);
+    if(f){ f.name = name; f.path = path; f.note = note; }
+  } else {
+    state.files.push({ id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+                       name: name, path: path, note: note });
+  }
+  closeFileModal();
+  save(); render();
+  toast('材料已保存');
+}
+
+$('btnAddFile').addEventListener('click', function(){ openFileModal(null); });
+$('btnToggleFiles').addEventListener('click', function(){ ui.filesOpen = !ui.filesOpen; render(); });
+$('gCancel').addEventListener('click', closeFileModal);
+$('gSave').addEventListener('click', saveFileModal);
+$('overlay2').addEventListener('click', function(e){ if(e.target === $('overlay2')) closeFileModal(); });
+$('g_pick').addEventListener('click', function(){ $('filePick').click(); });
+$('filePick').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!f) return;
+  var seen = {}, order = [];
+  state.files.forEach(function(x){
+    var d = rawDir(x.path);
+    if(d && !seen[d]){ seen[d] = true; order.push(d); }
+  });
+  if(order.length === 1){
+    $('g_path').value = order[0] + sepOf(order[0]) + f.name;
+    toast('已补全完整路径');
+  } else {
+    $('g_path').value = f.name;
+    toast('已填文件名，请补全前面的完整路径');
+  }
+  if(!$('g_name').value) $('g_name').value = f.name.replace(/\.[^.]+$/, '');
+});
+
+$('fileList').addEventListener('click', function(e){
+  var el = e.target.closest('[data-act]');
+  if(!el) return;
+  var box = e.target.closest('.fitem');
+  if(!box) return;
+  var f = findFile(box.getAttribute('data-id'));
+  if(!f) return;
+  var act = el.getAttribute('data-act');
+  if(act === 'fopen'){
+    if(!f.path){ toast('未填路径，请先点「编辑」'); return; }
+    if(!window.open(toFileUrl(f.path), '_blank')) toast('浏览器拦截了打开，请用「复制路径」');
+    return;
+  }
+  if(act === 'fdir'){
+    var d = rawDir(f.path);
+    if(!d){ toast('未填路径'); return; }
+    if(!window.open(toFileUrl(d), '_blank')) toast('浏览器拦截了打开');
+    return;
+  }
+  if(act === 'fcopy'){ copyText(f.path); return; }
+  if(act === 'fedit'){ openFileModal(f.id); return; }
+  if(act === 'fdel'){
+    if(!confirm('删除材料「' + f.name + '」？只删除本工具里的记录，不会动你磁盘上的文件。')) return;
+    state.files = state.files.filter(function(x){ return x.id !== f.id; });
+    save(); render();
+    toast('已删除');
+    return;
+  }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && !$('overlay2').hidden) closeFileModal();
+});
+
+/* ---------------- 不感兴趣库的展开 / 收起 ---------------- */
+$('trashHead').addEventListener('click', function(){ setTrashOpen(!trashOpen); });
+document.addEventListener('click', function(e){
+  if(!trashOpen) return;
+  if(e.target.closest('#trashPanel')) return;   /* 面板内部的点击不收起 */
+  setTrashOpen(false);
+});
+$('trashList').addEventListener('click', function(e){
+  var el = e.target.closest('[data-act]');
+  if(!el) return;
+  var box = e.target.closest('.titem');
+  if(!box) return;
+  var i = findTrash(box.getAttribute('data-id'));
+  if(i < 0) return;
+  var it = state.trash[i];
+  if(el.getAttribute('data-act') === 'trestore'){
+    state.trash.splice(i, 1);
+    delete it.archivedAt;
+    it.updatedAt = Date.now();
+    state.items.push(it);
+    renderAndSave();
+    toast('已恢复：' + it.name + '（已排到列表最后）');
+    return;
+  }
+  if(!confirm('彻底删除「' + it.name + '」？此操作不可恢复。')) return;
+  state.trash.splice(i, 1);
+  renderAndSave();
+  toast('已彻底删除');
+});
+$('trashClear').addEventListener('click', function(e){
+  e.stopPropagation();   /* 避免冒泡到标题栏导致面板收起 */
+  if(!state.trash.length){ toast('库是空的'); return; }
+  if(!confirm('清空「不感兴趣 / 不合适」库？共 ' + state.trash.length + ' 条，不可恢复。')) return;
+  state.trash = [];
+  renderAndSave();
+  toast('已清空');
+});
+
+render();
+if(!localStorage.getItem(STORE_KEY)) save();
+</script>
+</body>
+</html>
